@@ -1,9 +1,16 @@
+
+import { codeSnippets } from "@/components/BookMarkingFunctionality/CodeSnippetData";
+import SnippetCard from "@/components/BookMarkingFunctionality/SnippetCard";
 import { Button } from "@/components/ui/button";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 
+
 export default async function Home() {
   const snippets = await prisma.snippet.findMany();
+
+
+
 
   return (
     <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 bg-fixed w-full">
@@ -15,7 +22,7 @@ export default async function Home() {
             </h1>
             <p className="mt-4 text-lg text-blue-200">Your collection of useful code snippets</p>
           </div>
-          
+
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-2xl font-semibold text-blue-300">My Snippets</h2>
             <Link href="/snippet/new">
@@ -47,11 +54,44 @@ export default async function Home() {
                 </div>
               </Link>
             ))}
-          </div> 
+          </div>
 
          {snippets.length === 0 && (
             <div className="text-center py-12 animate-pulse">
               <p className="text-blue-400 text-lg">No snippets found. Create your first one!</p>
+
+
+
+
+
+
+
+
+
+
+
+              <div className=" w-full flex items-center justify-between flex-wrap "  >
+
+
+                {codeSnippets.map((item, index) =>(
+                     <SnippetCard key={index} codeSnippet={item}  />
+                ))}
+
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
           )}
         </div>
