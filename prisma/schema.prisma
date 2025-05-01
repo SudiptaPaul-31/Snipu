@@ -8,16 +8,28 @@ datasource db {
 }
 
 model Snippet {
-  id        Int       @id @default(autoincrement())
-  title     String
-  code      String
-  language  String
-  authorId  String
-  tags      String
-  createdAt DateTime  @default(now())
-  comments  Comment[]
-  author    User      @relation(fields: [authorId], references: [id])
+  id         Int        @id @default(autoincrement())
+  title      String
+  code       String
+  language   String
+  authorId   String
+  tags       String
+  createdAt  DateTime   @default(now())
+  comments   Comment[]
+  author     User       @relation(fields: [authorId], references: [id])
+  bookmarks  Bookmark[] // ✅ fixed indentation and placement
 }
+
+model Bookmark {
+  id         Int       @id @default(autoincrement())
+  user       User      @relation(fields: [userId], references: [id])
+  userId     String
+  snippet    Snippet   @relation(fields: [snippetId], references: [id])
+  snippetId  Int
+  createdAt  DateTime  @default(now())
+
+  @@unique([userId, snippetId]) // ✅ avoids duplicate bookmarks
+} // ✅ added missing closing brace
 
 model User {
   id            String    @id @default(uuid())
@@ -28,15 +40,16 @@ model User {
   updatedAt     DateTime  @updatedAt
   snippets      Snippet[]
   comments      Comment[]
+  bookmarks     Bookmark[]
 }
 
 model Comment {
-  id        Int      @id @default(autoincrement())
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  authorId  String
-  snippetId Int
-  author    User     @relation(fields: [authorId], references: [id])
-  snippet   Snippet  @relation(fields: [snippetId], references: [id], onDelete: Cascade)
+  id         Int       @id @default(autoincrement())
+  content    String
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  authorId   String
+  snippetId  Int
+  author     User      @relation(fields: [authorId], references: [id])
+  snippet    Snippet   @relation(fields: [snippetId], references: [id], onDelete: Cascade)
 }

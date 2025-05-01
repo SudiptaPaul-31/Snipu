@@ -1,4 +1,5 @@
 "use client";
+import { useWallet } from "@/app/providers/wallet-connect-context";
 import { useEffect, useState } from "react";
 
 interface BookmarkingBtnProps {
@@ -6,35 +7,70 @@ interface BookmarkingBtnProps {
 }
 
 export default function BookmarkingBtn({ snippetId }: BookmarkingBtnProps) {
-  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { address: walletAddress } = useWallet();
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
-    setIsBookmarked(stored.includes(snippetId));
-  }, [snippetId]);
+    if (!walletAddress) return;
 
-  const toggleBookmark = () => {
-    const stored = JSON.parse(localStorage.getItem("bookmarks") || "[]");
+    const fetchBookmarkStatus = async () => {
+      try {
+        const res = await fetch(`/api/bookmark/${snippetId}?walletAddress=${walletAddress}`);
+        if (!res.ok) throw new Error('Failed to fetch bookmark status');
+        const data = await res.json();
+        setBookmarked(data.bookmarked);
+      } catch (error) {
+        console.error("Error fetching bookmark state:", error);
+      }
+    };
 
-    let updated;
-    if (stored.includes(snippetId)) {
-      updated = stored.filter((id: number) => id !== snippetId);
-    } else {
-      updated = [...stored, snippetId];
+    fetchBookmarkStatus();
+  }, [snippetId, walletAddress]);
+
+  const toggleBookmark = async () => {
+    if (!walletAddress) {
+      console.error("No wallet address connected");
+      return;
     }
 
-    localStorage.setItem("bookmarks", JSON.stringify(updated));
-    setIsBookmarked(!isBookmarked);
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/bookmark/${snippetId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ walletAddress })
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || 'Failed to toggle bookmark');
+      }
+
+      const data = await res.json();
+      setBookmarked(data.bookmarked);
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+      // Optional: Show error to user
+      alert(error.message || "Failed to update bookmark");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (!walletAddress) return null;
 
   return (
     <button
-      className={`mt-4 px-4 py-2 rounded-sm text-white transition ${
-        isBookmarked ? "bg-red-500" : "bg-blue-600"
-      }`}
       onClick={toggleBookmark}
+      disabled={loading}
+      className={`mt-4 px-4 py-2 rounded-sm text-white transition ${
+        bookmarked ? "bg-red-500 hover:bg-red-600" : "bg-blue-600 hover:bg-blue-700"
+      } disabled:opacity-50`}
     >
-      {isBookmarked ? "Remove Bookmark" : "Bookmark"}
+      {loading ? "Processing..." : bookmarked ? "Remove Bookmark" : "Bookmark"}
     </button>
   );
 }

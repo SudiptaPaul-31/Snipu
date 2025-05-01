@@ -24,13 +24,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [isWalletDetected, setIsWalletDetected] = useState(false); // Manage wallet detection state
   const [error, setError] = useState<Error | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
+
   // Check if any wallet is available in the browser
   useEffect(() => {
     const hasWallet = connectors.some(connector => connector.available());
     setIsWalletDetected(hasWallet);
   }, [connectors]);
-  
+
   // Handle connection errors
   useEffect(() => {
     if (status === "error" as AccountStatus) {
@@ -39,7 +39,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setError(null);
     }
   }, [status]);
-  
+
   // Function to open the connect modal from anywhere in the app
   const openConnectModal = () => {
     setIsModalOpen(true);
@@ -49,7 +49,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const closeConnectModal = () => {
     setIsModalOpen(false);
   };
-  
+
   // Context value
   const value = {
     isConnected,
@@ -61,7 +61,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     openConnectModal,
     closeConnectModal
   };
-  
+
   return (
     <WalletContext.Provider value={value}>
       {children}
