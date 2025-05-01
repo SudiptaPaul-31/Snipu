@@ -1,5 +1,6 @@
 import React from "react";
 import WalletConnectButtons from "@/components/WalletConnectButtons";
+import SnippetUploader from './components/SnippetUploader';
 
 export default function Authentication() {
   return (
