@@ -20,16 +20,16 @@ model Snippet {
   bookmarks  Bookmark[] // ✅ fixed indentation and placement
 }
 
-model Bookmark {
-  id         Int       @id @default(autoincrement())
-  user       User      @relation(fields: [userId], references: [id])
-  userId     String
-  snippet    Snippet   @relation(fields: [snippetId], references: [id])
-  snippetId  Int
-  createdAt  DateTime  @default(now())
+// Add this model to your schema.prisma file
+model UserBookmark {
+  id            Int      @id @default(autoincrement())
+  walletAddress String   // The user's wallet address
+  snippetId     Int      // The ID of the bookmarked snippet
+  createdAt     DateTime @default(now())
 
-  @@unique([userId, snippetId]) // ✅ avoids duplicate bookmarks
-} // ✅ added missing closing brace
+  @@unique([walletAddress, snippetId]) // Prevents duplicate bookmarks
+  @@index([walletAddress]) // Improves query performance for user's bookmarks
+}
 
 model User {
   id            String    @id @default(uuid())
