@@ -3,16 +3,20 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useConnect } from "@starknet-react/core";
+import { useAccount, useConnect } from "@starknet-react/core";
 
 const WalletConnectButtons = () => {
   const { connect, connectors } = useConnect()
+  const { isConnected, connector: currentConnector } = useAccount();
 
   const braavosConnector = connectors.find(connector =>
     connector.name.toLowerCase().includes('braavos'))
   const argentConnector = connectors.find(connector =>
     connector.name.toLowerCase().includes('argent')
   );
+
+  const isBraavosConnected = isConnected && currentConnector?.name.toLowerCase().includes('braavos');
+  const isArgentConnected = isConnected && currentConnector?.name.toLowerCase().includes('argent');
 
   const handleBraavosConnect = () => {
     if (braavosConnector) {
@@ -32,7 +36,7 @@ const WalletConnectButtons = () => {
         size="lg"
         className="bg-white text-black hover:bg-gray-200"
         onClick={handleBraavosConnect}
-        disabled={!braavosConnector}
+        disabled={!braavosConnector || isBraavosConnected}
       >
         <Image
           src="/bravos.webp"
@@ -41,13 +45,13 @@ const WalletConnectButtons = () => {
           height={18}
           className="mr-2 rounded-full"
         />
-        Connect with Braavos
+        {isBraavosConnected ? "Connected" : "Connect with Braavos"}
       </Button>
       <Button
         size="lg"
         className="bg-white text-black hover:bg-gray-200"
         onClick={handleArgentConnect}
-        disabled={!argentConnector}
+        disabled={!argentConnector || isArgentConnected}
       >
         <Image
           src="/argent.png"
@@ -56,7 +60,7 @@ const WalletConnectButtons = () => {
           height={18}
           className="mr-2 rounded-full"
         />
-        Connect with Argent
+        {isArgentConnected ? "Connected" : "Connect with Argent"}
       </Button>
     </div>
   );
