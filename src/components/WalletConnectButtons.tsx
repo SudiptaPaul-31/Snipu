@@ -3,14 +3,36 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import { useConnect } from "@starknet-react/core";
 
 const WalletConnectButtons = () => {
+  const { connect, connectors } = useConnect()
+
+  const braavosConnector = connectors.find(connector =>
+    connector.name.toLowerCase().includes('braavos'))
+  const argentConnector = connectors.find(connector =>
+    connector.name.toLowerCase().includes('argent')
+  );
+
+  const handleBraavosConnect = () => {
+    if (braavosConnector) {
+      connect({ connector: braavosConnector });
+    }
+  };
+
+  const handleArgentConnect = () => {
+    if (argentConnector) {
+      connect({ connector: argentConnector });
+    }
+  };
+
   return (
     <div className="flex flex-col sm:flex-row gap-4 justify-center">
       <Button
         size="lg"
         className="bg-white text-black hover:bg-gray-200"
-        onClick={() => alert("Braavos wallet connection mocked!")}
+        onClick={handleBraavosConnect}
+        disabled={!braavosConnector}
       >
         <Image
           src="/bravos.webp"
@@ -24,7 +46,8 @@ const WalletConnectButtons = () => {
       <Button
         size="lg"
         className="bg-white text-black hover:bg-gray-200"
-        onClick={() => alert("Argent wallet connection mocked!")}
+        onClick={handleArgentConnect}
+        disabled={!argentConnector}
       >
         <Image
           src="/argent.png"
