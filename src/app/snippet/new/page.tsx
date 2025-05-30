@@ -55,6 +55,7 @@ const CreateSnippetPage = () => {
   const [initialCode, setInitialCode] = useState(code);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [tags, setTags] = useState<string[]>(["React"]);
+  const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     const hasDescriptionChanged = description !== initialDescription;
@@ -117,11 +118,17 @@ const CreateSnippetPage = () => {
 
   const handleCopyCode = () => {
     navigator.clipboard.writeText(code);
+    setIsCopied(true);
     toast({
       title: "Copied!",
       description: "Code snippet copied to clipboard",
       duration: 2000,
     });
+    
+    // Reset the copied state after 2 seconds
+    setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
   };
 
   const handleAddTag = (newTag: string) => {
@@ -337,8 +344,12 @@ const CreateSnippetPage = () => {
                     className="text-gray-400 hover:text-white hover:bg-transparent transition-colors flex items-center"
                     onClick={handleCopyCode}
                   >
-                    <Copy className="h-4 w-4 mr-2" />
-                    <span>Copy</span>
+                    {isCopied ? (
+                      <Check className="h-4 w-4 mr-2 text-green-500" />
+                    ) : (
+                      <Copy className="h-4 w-4 mr-2" />
+                    )}
+                    <span>{isCopied ? 'Copied!' : 'Copy'}</span>
                   </Button>
                   <Button
                     variant="ghost"
