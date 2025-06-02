@@ -133,7 +133,7 @@ const CreateSnippetPage = () => {
 
   const handleAddTag = (newTag: string) => {
     if (!tags.includes(newTag)) {
-      setTags((prev) => [...prev, newTag]);
+      setTags([newTag]);
     }
   };
 
@@ -260,6 +260,15 @@ const CreateSnippetPage = () => {
                       A
                     </div>
                     Angular
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
+                    onClick={() => handleAddTag("Nextjs")}
+                  >
+                    <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center text-xs text-white mr-2">
+                      N
+                    </div>
+                    Nextjs
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
