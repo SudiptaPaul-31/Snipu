@@ -248,7 +248,7 @@ const CreateSnippetPage = () => {
                       <ChevronDown className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-[#FFFFFF0A] border-[#333333] text-gray-300 rounded-lg">
+                  <DropdownMenuContent className="border-[#333333] text-gray-300 rounded-lg">
                     <DropdownMenuItem
                       className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
                       onClick={() => handleAddTag("React")}
@@ -298,7 +298,7 @@ const CreateSnippetPage = () => {
                       <ChevronDown className="h-4 w-4 ml-1" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="bg-[##FFFFFF0A] border-[#333333] text-gray-300 rounded-lg">
+                  <DropdownMenuContent className="border-[#333333] text-gray-300 rounded-lg">
                     <DropdownMenuItem
                       className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
                       onClick={() => setLanguage("JavaScript + CSS")}
@@ -337,7 +337,7 @@ const CreateSnippetPage = () => {
                 <Button
                   className={`${showSaveSuccess
                       ? "bg-green-600 hover:bg-green-700"
-                      : "bg-[#8B5CF6] hover:bg-[#7C3AED]"
+                      : "bg-[#2b126d] hover:bg-[#7C3AED]"
                     } text-white h-10 ml-auto transition-all duration-200 hover:scale-105 rounded-lg shadow-md flex items-center gap-2`}
                   onClick={handleSave}
                   disabled={!isSaveEnabled}
