@@ -13,7 +13,7 @@ export function StarknetProvider({ children }: { children: React.ReactNode }) {
   const { connectors } = useInjectedConnectors({
     recommended: [braavos(), argent()],
     includeRecommended: "onlyIfNoConnectors",
-    order: "random"
+    order: "random",
   });
 
   return (

@@ -28,7 +28,7 @@ export const deleteSnippet = async (id: number) => {
 };
 
 export async function createSnippet(prevState: any, formData: FormData) {
-  "use server"
+  "use server";
 
   try {
     const title = formData.get("title") as string;
@@ -36,7 +36,7 @@ export async function createSnippet(prevState: any, formData: FormData) {
     const language = formData.get("language") as string;
     const authorId = formData.get("authorId") as string;
     const tags = formData.get("tags") as string;
-    const description = formData.get("description") as string || ""; // Add description with default empty string
+    const description = (formData.get("description") as string) || ""; // Add description with default empty string
 
     // Validate inputs
     if (!title || title.length < 3) {
@@ -48,7 +48,7 @@ export async function createSnippet(prevState: any, formData: FormData) {
 
     try {
       // Upload to IPFS
-      const filename = `${title.replace(/\s+/g, '-')}.${language.toLowerCase()}`;
+      const filename = `${title.replace(/\s+/g, "-")}.${language.toLowerCase()}`;
       const cid = await uploadToIPFS(code, filename);
 
       // Create snippet in database with CID
@@ -59,12 +59,14 @@ export async function createSnippet(prevState: any, formData: FormData) {
           language,
           authorId,
           description, // Add the description field
-          tags: tags ? {
-            create: tags.split(',').map(tag => ({
-              name: tag.trim()
-            }))
-          } : undefined,
-          ipfsCid: cid
+          tags: tags
+            ? {
+                create: tags.split(",").map((tag) => ({
+                  name: tag.trim(),
+                })),
+              }
+            : undefined,
+          ipfsCid: cid,
         },
       });
 
@@ -80,14 +82,16 @@ export async function createSnippet(prevState: any, formData: FormData) {
           language,
           authorId,
           description, // Add the description field here too
-          tags: tags ? {
-            create: tags.split(',').map(tag => ({
-              name: tag.trim()
-            }))
-          } : undefined,
+          tags: tags
+            ? {
+                create: tags.split(",").map((tag) => ({
+                  name: tag.trim(),
+                })),
+              }
+            : undefined,
         },
       });
-      
+
       revalidatePath("/");
       redirect("/");
     }

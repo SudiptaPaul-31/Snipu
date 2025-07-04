@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import Link from "next/link"
-import { ArrowRight } from "lucide-react"
-import FeatureCard from "@/components/feature-card"
-import { motion } from "framer-motion"
-import GlowText from "@/components/glow-text"
+import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import FeatureCard from "@/components/feature-card";
+import { motion } from "framer-motion";
+import GlowText from "@/components/glow-text";
 
 export default function Home() {
   return (
@@ -92,11 +92,13 @@ export default function Home() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1.1, duration: 0.7 }}
           >
-            Snipu is a Decentralized Code Snippet Hub Built On Starknet. That Redefines How Developers Store, Share, And
-            Collaborate On Code. By Leveraging Blockchain Technology, The Platform Ensures That Code Snippets Are Stored
-            Securely On-Chain While Offering Seamless Access To A Global Community Of Developers. Snipu Revolutionizes
-            Code Sharing With Features Like Versioning, Access Control, Digital Rights Management, And More Than With
-            Ease Through Sharable Links.
+            Snipu is a Decentralized Code Snippet Hub Built On Starknet. That
+            Redefines How Developers Store, Share, And Collaborate On Code. By
+            Leveraging Blockchain Technology, The Platform Ensures That Code
+            Snippets Are Stored Securely On-Chain While Offering Seamless Access
+            To A Global Community Of Developers. Snipu Revolutionizes Code
+            Sharing With Features Like Versioning, Access Control, Digital
+            Rights Management, And More Than With Ease Through Sharable Links.
           </motion.p>
         </div>
 
@@ -175,11 +177,17 @@ export default function Home() {
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5, duration: 0.5 }}
         >
-          <Image src="/images/logo.jpg" alt="Snipu Logo" width={80} height={32} className="rounded-md" />
+          <Image
+            src="/images/logo.jpg"
+            alt="Snipu Logo"
+            width={80}
+            height={32}
+            className="rounded-md"
+          />
         </motion.div>
       </div>
       {/* Floating blue orb */}
       <div className="fixed bottom-10 right-10 w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400 opacity-70 blur-xl pulse-glow pointer-events-none"></div>
     </main>
-  )
+  );
 }

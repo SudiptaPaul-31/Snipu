@@ -178,29 +178,32 @@ bun dev
 ```
 
 ## Setup Guidelines
+
 # Setting up the Project
 
 This guide provides instructions for setting up and running the project on your local machine
 
 Make sure you have the following prerequisites installed on your system:
 
-- **npm** 
+- **npm**
 
 ## Setting Up the Project
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/SudiptaPaul-31/Snipu.git
    cd snipu
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    ```
 
 3. Create and switch into you own branch:
-    ```bash
+   ```bash
    git branch <your-branch>
    git checkout <your-branch>
    ```
@@ -216,55 +219,58 @@ To run the entire project, including both smart contracts and the frontend:
 
 The frontend should now be running at `http://localhost:3000`
 
-
 ## Notes for Contributors
 
 - Follow our contributor's guide given [here](./CONTRIBUTING.md).
 - Make sure to follow the respective commands for working on either the smart contracts or the frontend.
 - Ensure the code is properly building, passing tests and formatted using `npm run check` at the root directory before making a pull request.
- 
- ## Contribution Guidelines
- Thank you for your interest in contributing to this project! Please read the following rules carefully before applying to work on an issue.
- 
- ## Application Process
- 
- When applying to work on an issue:
- 
- 1. Provide a brief background about yourself.
- 2. Explain how you plan to approach the issue.
- 3. Share your estimated time of arrival (ETA) for completing the task.
- 
- ## Deadlines and Communication
- 
- - If you cannot complete the task within your ETA + 1 day, **you must inform me** on Telegram (@SoarinSkySagar). Failure to do so will result in you being unassigned from the issue.
- - Contributors can reach out for help regarding the project anytime via:
-   - My Telegram: [@Sudipta_31](https://t.me/sudipta_31)
-   - Project Telegram: [Snipu](https://t.me/snipu_code)
-   - Our project's Telegram group.
- 
- ## Workflow Requirements
- 
- 1. **Work on a Separate Branch**
+
+## Contribution Guidelines
+
+Thank you for your interest in contributing to this project! Please read the following rules carefully before applying to work on an issue.
+
+## Application Process
+
+When applying to work on an issue:
+
+1.  Provide a brief background about yourself.
+2.  Explain how you plan to approach the issue.
+3.  Share your estimated time of arrival (ETA) for completing the task.
+
+## Deadlines and Communication
+
+- If you cannot complete the task within your ETA + 1 day, **you must inform me** on Telegram (@SoarinSkySagar). Failure to do so will result in you being unassigned from the issue.
+- Contributors can reach out for help regarding the project anytime via:
+  - My Telegram: [@Sudipta_31](https://t.me/sudipta_31)
+  - Project Telegram: [Snipu](https://t.me/snipu_code)
+  - Our project's Telegram group.
+
+## Workflow Requirements
+
+1.  **Work on a Separate Branch**
+
     - Always create a new branch for your work and submit your pull requests (PRs) from there.
- 
- 2. **Run Checks Before Submitting a PR**
+
+2.  **Run Checks Before Submitting a PR**
+
     - Make sure to run the following command in the root directory:
       ```bash
       npm run check
       ```
     - Ensure there are no errors before submitting your PR.
- 
- 3. **PR Validation**
+
+3.  **PR Validation**
     - If any checks fail on your PR, you must fix them before it can be merged.
     - The only exception is **Vercel deployments**, which require my authorization.
- 
- ## Project Setup
- 
- Refer to the [SETUP.md](./SETUP.md) file in the same directory for detailed instructions on setting up the project.
- 
- By following these guidelines, you help ensure a smooth contribution process for everyone involved. Thank you for contributing!
+
+## Project Setup
+
+Refer to the [SETUP.md](./SETUP.md) file in the same directory for detailed instructions on setting up the project.
+
+By following these guidelines, you help ensure a smooth contribution process for everyone involved. Thank you for contributing!
 
 <!-- CONTRIBUTORS-START -->
+
 ## Contributors
 
 <table>
@@ -418,4 +424,3 @@ The frontend should now be running at `http://localhost:3000`
   </tr>
 </table>
 <!-- CONTRIBUTORS-END -->
-

@@ -81,7 +81,6 @@ const CreateSnippetPage = () => {
 
   const handleSave = async () => {
     try {
-
       const response = await fetch("/api/snippets", {
         method: "POST",
         headers: {
@@ -166,7 +165,6 @@ const CreateSnippetPage = () => {
 
   return (
     <>
-
       <Header />
       <div className="bg-hero-gradient min-h-screen bg-[#121212] text-gray-200 flex items-center justify-center flex-col w-full  sm:p-10 p-10">
         <div className="justify-start w-full max-w-[75rem] mx-auto flex items-center gap-2 m-4">
@@ -241,7 +239,9 @@ const CreateSnippetPage = () => {
                       variant="outline"
                       className="bg-transparent border-[#333333] text-gray-300 h-10 flex items-center gap-1 hover:bg-[#1A1A1A] hover:text-white transition-colors rounded-lg"
                     >
-                      <div className={`w-5 h-5 rounded-full ${getTagColor(tags[0])} flex items-center justify-center text-xs text-white`}>
+                      <div
+                        className={`w-5 h-5 rounded-full ${getTagColor(tags[0])} flex items-center justify-center text-xs text-white`}
+                      >
                         {tags[0]?.[0] || "T"}
                       </div>
                       <span className="mx-1">{tags.join(", ")}</span>
@@ -335,10 +335,11 @@ const CreateSnippetPage = () => {
                 </Button>
 
                 <Button
-                  className={`${showSaveSuccess
+                  className={`${
+                    showSaveSuccess
                       ? "bg-green-600 hover:bg-green-700"
                       : "bg-[#2b126d] hover:bg-[#7C3AED]"
-                    } text-white h-10 ml-auto transition-all duration-200 hover:scale-105 rounded-lg shadow-md flex items-center gap-2`}
+                  } text-white h-10 ml-auto transition-all duration-200 hover:scale-105 rounded-lg shadow-md flex items-center gap-2`}
                   onClick={handleSave}
                   disabled={!isSaveEnabled}
                 >
@@ -372,7 +373,7 @@ const CreateSnippetPage = () => {
                       ) : (
                         <Copy className="h-4 w-4 mr-2" />
                       )}
-                      <span>{isCopied ? 'Copied!' : 'Copy'}</span>
+                      <span>{isCopied ? "Copied!" : "Copy"}</span>
                     </Button>
                     <Button
                       variant="ghost"
@@ -439,7 +440,9 @@ const CreateSnippetPage = () => {
                                 <span className="text-orange-400">button </span>
                                 <span className="text-yellow-400">class</span>
                                 <span className="text-white">{"="}</span>
-                                <span className="text-green-400">{'"btn"'} </span>
+                                <span className="text-green-400">
+                                  {'"btn"'}{" "}
+                                </span>
                                 <span className="text-yellow-400">onclick</span>
                                 <span className="text-white">{"="}</span>
                                 <span className="text-green-400">
@@ -469,7 +472,9 @@ const CreateSnippetPage = () => {
                           if (line.includes(".btn {")) {
                             return (
                               <div key={index}>
-                                <span className="text-yellow-400">{".btn"} </span>
+                                <span className="text-yellow-400">
+                                  {".btn"}{" "}
+                                </span>
                                 <span className="text-white">{"{"}</span>
                               </div>
                             );

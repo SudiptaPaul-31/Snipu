@@ -21,9 +21,11 @@ When applying to work on an issue:
 ## Workflow Requirements
 
 1. **Work on a Separate Branch**
+
    - Always create a new branch for your work and submit your pull requests (PRs) from there.
 
 2. **Run Checks Before Submitting a PR**
+
    - Make sure to run the following command in the root directory:
      ```bash
      npm run check

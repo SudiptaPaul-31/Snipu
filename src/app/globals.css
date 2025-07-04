@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Geist:wght@100..900&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +10,12 @@ body {
   font-family: "Inter", sans-serif;
   font-optical-sizing: auto;
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(to bottom, rgb(var(--background-start-rgb)), rgb(var(--background-end-rgb))) fixed;
+  background: linear-gradient(
+      to bottom,
+      rgb(var(--background-start-rgb)),
+      rgb(var(--background-end-rgb))
+    )
+    fixed;
 }
 
 @layer base {
@@ -19,7 +24,8 @@ body {
   }
 
   .bg-hero-gradient {
-    background: url("/images/gradient.svg"), url("/images/ellipse.svg"), url("/images/sparkles.svg");
+    background: url("/images/gradient.svg"), url("/images/ellipse.svg"),
+      url("/images/sparkles.svg");
     background-repeat: no-repeat;
     background-size: cover;
     background-position: top, center, center;
@@ -154,7 +160,6 @@ textarea:focus {
   }
 }
 
-
 /* Blue glow effects */
 .blue-glow {
   position: relative;
@@ -174,7 +179,12 @@ textarea:focus {
 /* Animated light rays */
 .light-ray {
   position: absolute;
-  background: linear-gradient(to right, rgba(59, 130, 246, 0), rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0));
+  background: linear-gradient(
+    to right,
+    rgba(59, 130, 246, 0),
+    rgba(59, 130, 246, 0.1),
+    rgba(59, 130, 246, 0)
+  );
   transform: rotate(45deg);
   pointer-events: none;
 }

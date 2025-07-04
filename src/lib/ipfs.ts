@@ -1,9 +1,8 @@
-
-import pinataSDK from '@pinata/sdk';
+import pinataSDK from "@pinata/sdk";
 
 const pinata = new pinataSDK(
-  process.env.PINATA_API_KEY || '',
-  process.env.PINATA_API_SECRET || ''
+  process.env.PINATA_API_KEY || "",
+  process.env.PINATA_API_SECRET || "",
 );
 
 /**
@@ -15,20 +14,20 @@ const pinata = new pinataSDK(
  */
 export async function uploadToIPFS(
   content: string,
-  name: string
+  name: string,
 ): Promise<string> {
   try {
     const result = await pinata.pinJSONToIPFS(
       { snippet: content },
       {
         pinataMetadata: { name },
-        pinataOptions: { cidVersion: 1 }
-      }
+        pinataOptions: { cidVersion: 1 },
+      },
     );
     return result.IpfsHash;
   } catch (err) {
-    console.error('Pinata upload error:', err);
-    throw new Error('Failed to upload to IPFS');
+    console.error("Pinata upload error:", err);
+    throw new Error("Failed to upload to IPFS");
   }
 }
 

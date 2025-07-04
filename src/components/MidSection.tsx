@@ -1,7 +1,6 @@
-import { Plus } from 'lucide-react'
-import Link from 'next/link'
-import React from 'react'
-
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import React from "react";
 
 const MidSection = () => {
   return (
@@ -23,6 +22,6 @@ const MidSection = () => {
       </Link>
     </div>
   );
-}
+};
 
-export default MidSection
+export default MidSection;
