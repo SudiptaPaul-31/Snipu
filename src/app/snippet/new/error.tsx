@@ -1,14 +1,12 @@
-"use client"
-import React from 'react'
+"use client";
+import React from "react";
 
 type ErrorPageProps = {
-  error: Error
-}
+  error: Error;
+};
 
-const ErrorPage : React.FC<ErrorPageProps> = ({error}) => {
-  return (
-    <div>{error.message}</div>
-  )
-}
+const ErrorPage: React.FC<ErrorPageProps> = ({ error }) => {
+  return <div>{error.message}</div>;
+};
 
-export default ErrorPage
+export default ErrorPage;

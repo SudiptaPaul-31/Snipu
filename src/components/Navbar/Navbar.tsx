@@ -26,10 +26,8 @@ const Header = () => {
               />
             </div>
 
-
             {/* Navigation Links - Desktop */}
-            <div className="hidden md:flex space-x-8 items-center justify-between px-2">
-            </div>
+            <div className="hidden md:flex space-x-8 items-center justify-between px-2"></div>
           </div>
           <div className="hidden md:flex text-white space-x-4">
             <ConnectButton />

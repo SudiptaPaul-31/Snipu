@@ -243,7 +243,7 @@ export default function Home() {
           ? true
           : snippet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             snippet.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase())
+              tag.toLowerCase().includes(searchQuery.toLowerCase()),
             );
 
       const matchesLanguage =
@@ -310,7 +310,7 @@ export default function Home() {
   // };
   const handleToggleBookmark = async (
     e: React.MouseEvent,
-    snippet: Snippet
+    snippet: Snippet,
   ) => {
     e.preventDefault(); // Prevent navigation since star is inside Link
 

@@ -18,7 +18,10 @@ export function ConnectButton() {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsDropdownOpen(false);
       }
     }
@@ -41,7 +44,13 @@ export function ConnectButton() {
             onClick={() => setIsDropdownOpen((open) => !open)}
             className="flex items-center gap-2 bg-[#1C1D1F] text-white px-4 py-2 rounded-md hover:bg-[#2a2b2e] transition-colors"
           >
-            <Image src="/1.png" alt="profile" width={20} height={23} className="rounded-full" />
+            <Image
+              src="/1.png"
+              alt="profile"
+              width={20}
+              height={23}
+              className="rounded-full"
+            />
             {truncateAddress(address)}
             <span
               className={`border-white border-b-2 border-r-2 inline-block w-2 h-2 transform ${

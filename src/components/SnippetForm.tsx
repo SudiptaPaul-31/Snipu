@@ -18,11 +18,13 @@ export default function SnippetForm({ userId }: { userId: string }) {
   const handleSubmit = async (formData: FormData) => {
     setIsUploading(true);
     setUploadError(null);
-    
+
     try {
       await formAction(formData);
     } catch (error) {
-      setUploadError(error instanceof Error ? error.message : 'Failed to upload snippet');
+      setUploadError(
+        error instanceof Error ? error.message : "Failed to upload snippet",
+      );
     } finally {
       setIsUploading(false);
     }
@@ -36,7 +38,7 @@ export default function SnippetForm({ userId }: { userId: string }) {
           {state.message}
         </div>
       )}
-      
+
       {/* Display client-side upload errors */}
       {uploadError && (
         <div className="p-3 bg-red-500/20 border border-red-500 rounded text-red-200 mb-4">
@@ -46,7 +48,10 @@ export default function SnippetForm({ userId }: { userId: string }) {
 
       {/* Form fields */}
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-200">
+        <label
+          htmlFor="title"
+          className="block text-sm font-medium text-gray-200"
+        >
           Title
         </label>
         <input
@@ -59,7 +64,10 @@ export default function SnippetForm({ userId }: { userId: string }) {
       </div>
 
       <div>
-        <label htmlFor="code" className="block text-sm font-medium text-gray-200">
+        <label
+          htmlFor="code"
+          className="block text-sm font-medium text-gray-200"
+        >
           Code
         </label>
         <textarea
@@ -72,7 +80,10 @@ export default function SnippetForm({ userId }: { userId: string }) {
       </div>
 
       <div>
-        <label htmlFor="language" className="block text-sm font-medium text-gray-200">
+        <label
+          htmlFor="language"
+          className="block text-sm font-medium text-gray-200"
+        >
           Language
         </label>
         <select
@@ -98,7 +109,10 @@ export default function SnippetForm({ userId }: { userId: string }) {
       </div>
 
       <div>
-        <label htmlFor="tags" className="block text-sm font-medium text-gray-200">
+        <label
+          htmlFor="tags"
+          className="block text-sm font-medium text-gray-200"
+        >
           Tags (comma separated)
         </label>
         <input

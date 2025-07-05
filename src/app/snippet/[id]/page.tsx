@@ -56,7 +56,7 @@ const SnippetDetailPage: React.FC<SnippetDetailsProps> = async ({ params }) => {
           {/* Add IPFS link if available */}
           {snippet.ipfsCid && (
             <div className="mt-2">
-              <a 
+              <a
                 href={getIPFSUrl(snippet.ipfsCid)}
                 target="_blank"
                 rel="noopener noreferrer"

@@ -6,17 +6,20 @@ import Image from "next/image";
 import { useAccount, useConnect } from "@starknet-react/core";
 
 const WalletConnectButtons = () => {
-  const { connect, connectors } = useConnect()
+  const { connect, connectors } = useConnect();
   const { isConnected, connector: currentConnector } = useAccount();
 
-  const braavosConnector = connectors.find(connector =>
-    connector.name.toLowerCase().includes('braavos'))
-  const argentConnector = connectors.find(connector =>
-    connector.name.toLowerCase().includes('argent')
+  const braavosConnector = connectors.find((connector) =>
+    connector.name.toLowerCase().includes("braavos"),
+  );
+  const argentConnector = connectors.find((connector) =>
+    connector.name.toLowerCase().includes("argent"),
   );
 
-  const isBraavosConnected = isConnected && currentConnector?.name.toLowerCase().includes('braavos');
-  const isArgentConnected = isConnected && currentConnector?.name.toLowerCase().includes('argent');
+  const isBraavosConnected =
+    isConnected && currentConnector?.name.toLowerCase().includes("braavos");
+  const isArgentConnected =
+    isConnected && currentConnector?.name.toLowerCase().includes("argent");
 
   const handleBraavosConnect = () => {
     if (braavosConnector) {

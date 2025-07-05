@@ -1,21 +1,21 @@
-import React from 'react';
-import { prisma } from '@/lib/prisma';
+import React from "react";
+import { prisma } from "@/lib/prisma";
 import EditSnippetForm from "@/components/EditSnippetForm";
-import Link from 'next/link';
+import Link from "next/link";
 
-const EditPageSnippet = async({
+const EditPageSnippet = async ({
   params,
-} : {
-  params: Promise<{id: string}>;
+}: {
+  params: Promise<{ id: string }>;
 }) => {
   const id = parseInt((await params).id);
   const snippet = await prisma.snippet.findUnique({
     where: {
       id,
     },
-  })
+  });
 
-  if(!snippet) {
+  if (!snippet) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 bg-fixed">
         <div className="max-w-4xl mx-auto p-8 animate-fade-in">
@@ -24,9 +24,10 @@ const EditPageSnippet = async({
               Snippet not found
             </h1>
             <p className="text-blue-200 mb-6">
-              The snippet you&apos;re looking for doesn&apos;t exist or has been removed.
+              The snippet you&apos;re looking for doesn&apos;t exist or has been
+              removed.
             </p>
-            <Link 
+            <Link
               href="/"
               className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors"
             >
@@ -35,7 +36,7 @@ const EditPageSnippet = async({
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -49,7 +50,7 @@ const EditPageSnippet = async({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
 export default EditPageSnippet;

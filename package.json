@@ -37,6 +37,7 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "esbuild": "0.25.3",
     "@eslint/eslintrc": "^3",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.17.31",
