@@ -36,7 +36,7 @@ export async function createSnippet(prevState: any, formData: FormData) {
     const language = formData.get("language") as string;
     const authorId = formData.get("authorId") as string;
     const tags = formData.get("tags") as string;
-    const description = (formData.get("description") as string) || ""; // Add description with default empty string
+    const description = (formData.get("description") as string) || "";
 
     // Validate inputs
     if (!title || title.length < 3) {
@@ -48,17 +48,20 @@ export async function createSnippet(prevState: any, formData: FormData) {
 
     try {
       // Upload to IPFS
-      const filename = `${title.replace(/\s+/g, "-")}.${language.toLowerCase()}`;
+      const filename = `${title.replace(
+        /\s+/g,
+        "-"
+      )}.${language.toLowerCase()}`;
       const cid = await uploadToIPFS(code, filename);
 
-      // Create snippet in database with CID
+      // Create snippet in database with CID and description
       await prisma.snippet.create({
         data: {
           title,
           code,
           language,
           authorId,
-          description, // Add the description field
+          description,
           tags: tags
             ? {
                 create: tags.split(",").map((tag) => ({
@@ -81,7 +84,7 @@ export async function createSnippet(prevState: any, formData: FormData) {
           code,
           language,
           authorId,
-          description, // Add the description field here too
+          description,
           tags: tags
             ? {
                 create: tags.split(",").map((tag) => ({

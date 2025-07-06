@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronDown,
   Code2,
@@ -13,9 +14,13 @@ import {
   Globe,
   Lock,
   Check,
-  Star,
   Bookmark,
   BookmarkX,
+  ArrowLeft,
+  Save,
+  Eye,
+  Sparkles,
+  FileCode,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -24,62 +29,103 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/hooks/use-toast";
-import { MoveLeft } from "lucide-react";
 import Header from "@/components/Navbar/Navbar";
 import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import type { JSX } from "react/jsx-runtime";
 
 const CreateSnippetPage = () => {
-  const [language, setLanguage] = useState("JavaScript + CSS");
-  const [visibility, setVisibility] = useState("Secret/Public");
+  const [language, setLanguage] = useState("JavaScript");
+  const [visibility, setVisibility] = useState("Public");
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
-  const [code, setCode] =
-    useState(`<button class="btn" onclick="this.style.backgroundColor='#'+Math.floor(Math.random()*16777215).toString(16)">Click</button>
+  const [code, setCode] = useState(`// Welcome to Snipu! 
+// Start writing your amazing code here...
 
-<style>
-.btn {
-  padding: 8px 12px;
-  font-size: 14px;
-  border: none;
-  cursor: pointer;
-  background: #5141A4;
-  color: white;
-  border-radius: 5px;
-  transition: background 0.3s;
+function greetUser(name) {
+  return \`Hello, \${name}! Welcome to the future of code sharing.\`;
 }
-</style>`);
-  const [isEditing, setIsEditing] = useState(false);
+
+console.log(greetUser("Developer"));`);
+  const [isEditing, setIsEditing] = useState(true);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isSaveEnabled, setIsSaveEnabled] = useState(false);
-  const [initialDescription, setInitialDescription] = useState("");
-  const [initialCode, setInitialCode] = useState(code);
+  const [isSaveEnabled, setIsSaveEnabled] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [tags, setTags] = useState<string[]>(["React"]);
+  const [tags, setTags] = useState<string[]>(["JavaScript"]);
   const [isCopied, setIsCopied] = useState(false);
 
   const getTagColor = (tagName: string): string => {
-    switch (tagName) {
-      case "React":
-        return "bg-blue-500";
-      case "Vue":
-        return "bg-green-500";
-      case "Angular":
-        return "bg-red-500";
-      case "Nextjs":
-        return "bg-black";
-      default:
-        return "bg-blue-500";
-    }
+    const colors: Record<string, string> = {
+      React: "from-blue-400 to-blue-600",
+      Vue: "from-green-400 to-green-600",
+      Angular: "from-red-400 to-red-600",
+      JavaScript: "from-yellow-400 to-orange-500",
+      TypeScript: "from-blue-500 to-blue-700",
+      Python: "from-blue-600 to-indigo-600",
+      CSS: "from-pink-400 to-purple-500",
+      HTML: "from-orange-400 to-red-500",
+    };
+    return colors[tagName] || "from-gray-400 to-gray-600";
   };
 
-  useEffect(() => {
-    const hasDescriptionChanged = description !== initialDescription;
-    const hasCodeChanged = code !== initialCode;
-
-    setIsSaveEnabled(isEditing || hasDescriptionChanged || hasCodeChanged);
-  }, [isEditing, description, code, initialDescription, initialCode]);
+  const getLanguageIcon = (lang: string) => {
+    const icons: Record<string, JSX.Element> = {
+      JavaScript: (
+        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-yellow-400 text-xs font-bold text-black">
+          JS
+        </div>
+      ),
+      TypeScript: (
+        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-blue-700 text-xs font-bold text-white">
+          TS
+        </div>
+      ),
+      Python: (
+        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-blue-600 text-xs font-bold text-white">
+          PY
+        </div>
+      ),
+      React: (
+        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-blue-500 text-xs font-bold text-white">
+          R
+        </div>
+      ),
+      Vue: (
+        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-green-500 text-xs font-bold text-white">
+          V
+        </div>
+      ),
+      Angular: (
+        <div className="w-5 h-5 flex items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white">
+          A
+        </div>
+      ),
+    };
+    return icons[lang] || <FileCode className="w-5 h-5 text-teal-400" />;
+  };
 
   const handleSave = async () => {
+    if (!title.trim()) {
+      toast({
+        title: "Title Required",
+        description: "Please enter a title for your snippet",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (!code.trim()) {
+      toast({
+        title: "Code Required",
+        description: "Please enter some code for your snippet",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
     try {
       const response = await fetch("/api/snippets", {
         method: "POST",
@@ -104,16 +150,13 @@ const CreateSnippetPage = () => {
       const savedSnippet = await response.json();
       console.log("Snippet saved:", savedSnippet);
 
-      setInitialDescription(description);
-      setInitialCode(code);
-      setIsEditing(false);
       setShowSaveSuccess(true);
       setIsSaveEnabled(false);
 
       toast({
         title: "Success!",
-        description: "Snippet saved successfully",
-        duration: 2000,
+        description: "Your snippet has been saved to the blockchain",
+        duration: 3000,
       });
 
       setTimeout(() => {
@@ -123,8 +166,8 @@ const CreateSnippetPage = () => {
       console.error("Error saving snippet:", error);
       toast({
         title: "Error",
-        description: "Failed to save snippet",
-        duration: 2000,
+        description: "Failed to save snippet. Please try again.",
+        duration: 3000,
         variant: "destructive",
       });
     }
@@ -139,7 +182,6 @@ const CreateSnippetPage = () => {
       duration: 2000,
     });
 
-    // Reset the copied state after 2 seconds
     setTimeout(() => {
       setIsCopied(false);
     }, 2000);
@@ -151,7 +193,6 @@ const CreateSnippetPage = () => {
     }
   };
 
-  // Add this with your other functions
   const handleToggleBookmark = () => {
     setIsBookmarked(!isBookmarked);
     toast({
@@ -164,402 +205,474 @@ const CreateSnippetPage = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1929] to-black text-white overflow-hidden relative">
+      {/* Animated background effects */}
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-teal-500 opacity-10 rounded-full blur-[150px]"></div>
+        <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-blue-600 opacity-8 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-cyan-400 opacity-8 rounded-full blur-[100px]"></div>
+      </div>
+
       <Header />
-      <div className="bg-hero-gradient min-h-screen bg-[#121212] text-gray-200 flex items-center justify-center flex-col w-full  sm:p-10 p-10">
-        <div className="justify-start w-full max-w-[75rem] mx-auto flex items-center gap-2 m-4">
-          <Button
-            variant="outline"
-            className="bg-[##100720] border-[#333333] text-gray-300 h-10 flex items-center gap-1 hover:bg-[#1A1A1A] hover:text-white transition-colors rounded-lg"
-            onClick={() => {
-              // Logic to navigate back to the previous page
-              window.history.back();
-            }}
+
+      <main className="container mx-auto px-4 py-8">
+        {/* Back Navigation */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Link
+            href="/snippet"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-teal-400 transition-colors group"
           >
-            <MoveLeft className="mr-1" />
-            <span className="text-gray-400"> Back to snippets</span>
-          </Button>
-        </div>
-        <div className="bg-[#190B2D73] rounded-lg  w-full max-w-[75rem] mx-auto flex flex-col items-center sm:p-10 p-10">
-          {/* Main container with visible border */}
-          <div className="w-full max-w-[62.5rem] mt-14 ">
-            <div className="w-full mb-8">
-              <Label className="text-lg" htmlFor="text">
-                Title
-              </Label>
-              <Input
-                placeholder="Enter snippet title"
-                className="bg-transparent border-[#333333] text-gray-300 h-[55px] text-2xl placeholder:italic placeholder:text-gray-500 rounded-lg"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div className="mb-8">
-              <Label className="text-lg" htmlFor="text">
-                Description
-              </Label>
-              <Input
-                placeholder="Describe your code snippet"
-                className="bg-transparent border-[#333333] text-gray-300 h-[55px] text-2xl placeholder:italic placeholder:text-gray-500 rounded-lg"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-          </div>
-          <div className="bg-[#07031271] boader-[#E3E3E31F] w-full max-w-[62.5rem] rounded-lg p-6 shadow-[0_-20.08px_80.32px_0_rgba(147,57,255,0.16)]">
-            <div className="bg-[##FFFFFF0A] rounded-xl overflow-hidden border border-[#333333] max-w-[61rem]">
-              {/* Header with controls */}
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Snippets
+          </Link>
+        </motion.div>
 
-              <div className="flex items-center gap-2 p-3 border-b border-[#333333] bg-[#FFFFFF0A]">
-                <h2 className="text-[#6A6A6A] text-xl ml-2 w-[411px]">
-                  Enter your snippet below
-                </h2>
-                <DropdownMenu>
-                  <DropdownMenuContent className="bg-[#1A1A1A] border-[#333333] text-gray-300 rounded-lg">
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => setVisibility("Secret")}
-                    >
-                      <Lock className="h-4 w-4 mr-2" />
-                      Secret
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => setVisibility("Public")}
-                    >
-                      <Globe className="h-4 w-4 mr-2" />
-                      Public
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+        <div className="max-w-6xl mx-auto">
+          {/* Hero Section */}
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7 }}
+          >
+            <motion.div
+              className="inline-flex items-center justify-center mb-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2, duration: 0.5 }}
+            >
+              <span className="text-teal-400 border-2 border-teal-700 text-sm px-4 rounded-full py-1 flex items-center gap-2">
+                <Sparkles className="w-4 h-4" />
+                Create New Snippet
+              </span>
+            </motion.div>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="bg-transparent border-[#333333] text-gray-300 h-10 flex items-center gap-1 hover:bg-[#1A1A1A] hover:text-white transition-colors rounded-lg"
-                    >
-                      <div
-                        className={`w-5 h-5 rounded-full ${getTagColor(tags[0])} flex items-center justify-center text-xs text-white`}
-                      >
-                        {tags[0]?.[0] || "T"}
-                      </div>
-                      <span className="mx-1">{tags.join(", ")}</span>
-                      <ChevronDown className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="border-[#333333] text-gray-300 rounded-lg">
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => handleAddTag("React")}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center text-xs text-white mr-2">
-                        R
-                      </div>
-                      React
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => handleAddTag("Vue")}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center text-xs text-white mr-2">
-                        V
-                      </div>
-                      Vue
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => handleAddTag("Angular")}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center text-xs text-white mr-2">
-                        A
-                      </div>
-                      Angular
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => handleAddTag("Nextjs")}
-                    >
-                      <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center text-xs text-white mr-2">
-                        N
-                      </div>
-                      Nextjs
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+            <motion.h1
+              className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white via-teal-200 to-cyan-400 bg-clip-text text-transparent"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.7 }}
+            >
+              Share Your Code with the World
+            </motion.h1>
 
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className="bg-transparent border-[#333333] text-gray-300 h-10 flex items-center gap-1 hover:bg-[#1A1A1A] hover:text-white transition-colors rounded-lg"
-                    >
-                      <span>{language}</span>
-                      <ChevronDown className="h-4 w-4 ml-1" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="border-[#333333] text-gray-300 rounded-lg">
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => setLanguage("JavaScript + CSS")}
-                    >
-                      JavaScript + CSS
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => setLanguage("TypeScript")}
-                    >
-                      TypeScript
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => setLanguage("HTML")}
-                    >
-                      HTML
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      className="hover:bg-[#252525] hover:text-white focus:bg-[#252525] focus:text-white"
-                      onClick={() => setLanguage("Python")}
-                    >
-                      Python
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+            <motion.p
+              className="text-xl text-gray-300 max-w-2xl mx-auto"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.6, duration: 0.7 }}
+            >
+              Create, store, and share your code snippets on the blockchain with
+              enhanced security and global accessibility
+            </motion.p>
+          </motion.div>
 
-                <Button
-                  variant="outline"
-                  className="bg-transparent border-[#333333] text-gray-300 h-10 flex items-center gap-1 hover:bg-[#1A1A1A] hover:text-white transition-all duration-200 hover:scale-105 rounded-lg shadow-sm"
-                >
-                  <Share2 className="h-4 w-4 mr-1" />
-                  Share/Export
-                </Button>
+          {/* Form Section */}
+          <motion.div
+            className="bg-gradient-to-r from-slate-800/40 to-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.7 }}
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Left Column - Metadata */}
+              <div className="space-y-6">
+                <div>
+                  <Label className="text-lg font-semibold text-white mb-3 block">
+                    Title
+                  </Label>
+                  <Input
+                    placeholder="Enter a descriptive title for your snippet"
+                    className="bg-slate-800/50 border-slate-600/50 text-white placeholder-gray-400 h-12 text-lg focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400/50 transition-all duration-300"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                  />
+                </div>
 
-                <Button
-                  className={`${
-                    showSaveSuccess
-                      ? "bg-green-600 hover:bg-green-700"
-                      : "bg-[#2b126d] hover:bg-[#7C3AED]"
-                  } text-white h-10 ml-auto transition-all duration-200 hover:scale-105 rounded-lg shadow-md flex items-center gap-2`}
-                  onClick={handleSave}
-                  disabled={!isSaveEnabled}
-                >
-                  {showSaveSuccess ? (
-                    <>
-                      <Check className="h-4 w-4" />
-                      Saved!
-                    </>
-                  ) : (
-                    "Save"
-                  )}
-                </Button>
+                <div>
+                  <Label className="text-lg font-semibold text-white mb-3 block">
+                    Description
+                  </Label>
+                  <Textarea
+                    placeholder="Describe what your code does and how to use it"
+                    className="bg-slate-800/50 border-slate-600/50 text-white placeholder-gray-400 min-h-[120px] focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400/50 transition-all duration-300 resize-none"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                  />
+                </div>
+
+                {/* Settings Row */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {/* Language Selector */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Language
+                    </Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-slate-800/50 border-slate-600/50 text-white hover:bg-slate-700/50 hover:text-white justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            {getLanguageIcon(language)}
+                            <span>{language}</span>
+                          </div>
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="w-full bg-slate-800 border-slate-700">
+                        {[
+                          "JavaScript",
+                          "TypeScript",
+                          "Python",
+                          "HTML",
+                          "CSS",
+                          "React",
+                          "Vue",
+                          "Angular",
+                        ].map((lang) => (
+                          <DropdownMenuItem
+                            key={lang}
+                            onClick={() => setLanguage(lang)}
+                            className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
+                          >
+                            {getLanguageIcon(lang)}
+                            {lang}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Framework/Tag Selector */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Framework
+                    </Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-slate-800/50 border-slate-600/50 text-white hover:bg-slate-700/50 hover:text-white justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            <div
+                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(
+                                tags[0]
+                              )}`}
+                            />
+                            <span>{tags[0]}</span>
+                          </div>
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-slate-800 border-slate-700">
+                        {[
+                          "React",
+                          "Vue",
+                          "Angular",
+                          "JavaScript",
+                          "TypeScript",
+                          "Python",
+                        ].map((tag) => (
+                          <DropdownMenuItem
+                            key={tag}
+                            onClick={() => handleAddTag(tag)}
+                            className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
+                          >
+                            <div
+                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(
+                                tag
+                              )}`}
+                            />
+                            {tag}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+
+                  {/* Visibility Selector */}
+                  <div>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Visibility
+                    </Label>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full bg-slate-800/50 border-slate-600/50 text-white hover:bg-slate-700/50 hover:text-white justify-between"
+                        >
+                          <div className="flex items-center gap-2">
+                            {visibility === "Public" ? (
+                              <Globe className="w-4 h-4" />
+                            ) : (
+                              <Lock className="w-4 h-4" />
+                            )}
+                            <span>{visibility}</span>
+                          </div>
+                          <ChevronDown className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent className="bg-slate-800 border-slate-700">
+                        <DropdownMenuItem
+                          onClick={() => setVisibility("Public")}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
+                        >
+                          <Globe className="w-4 h-4" />
+                          Public
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => setVisibility("Private")}
+                          className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
+                        >
+                          <Lock className="w-4 h-4" />
+                          Private
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
               </div>
 
-              {/* Code snippet area */}
-              <div className="m-4 p-10 bg-[#FFFFFF0A] boader-[#FFFFFF33] rounded-lg">
+              {/* Right Column - Preview */}
+              <div className="bg-slate-900/50 rounded-xl p-6 border border-slate-700/30">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-gray-300 font-medium flex items-center text-base">
-                    <Code2 className="h-5 w-5 mr-2" />
-                    Code Snippet
-                  </h2>
-                  <div className="flex gap-4">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-400 hover:text-white hover:bg-transparent transition-colors flex items-center"
-                      onClick={handleCopyCode}
-                    >
-                      {isCopied ? (
-                        <Check className="h-4 w-4 mr-2 text-green-500" />
-                      ) : (
-                        <Copy className="h-4 w-4 mr-2" />
-                      )}
-                      <span>{isCopied ? "Copied!" : "Copy"}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-400 hover:text-white hover:bg-transparent transition-colors flex items-center"
-                      onClick={() => setIsEditing(!isEditing)}
-                    >
-                      <Edit className="h-4 w-4 mr-2" />
-                      <span>{isEditing ? "Cancel" : "Edit"}</span>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-gray-400 hover:text-white hover:bg-transparent transition-colors flex items-center"
-                      onClick={handleToggleBookmark}
-                      title="Bookmark this Snippet"
-                    >
-                      {isBookmarked ? (
-                        <>
-                          <Bookmark className="h-4 w-4 mr-2 fill-current" />
-                          <span>Bookmarked</span>
-                        </>
-                      ) : (
-                        <>
-                          <BookmarkX className="h-4 w-4 mr-2" />
-                          <span>Bookmark</span>
-                        </>
-                      )}
-                    </Button>
+                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                    <Eye className="w-5 h-5 text-teal-400" />
+                    Live Preview
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-3 h-3 rounded-full bg-gradient-to-r ${getTagColor(
+                        language
+                      )}`}
+                    />
+                    <span className="text-sm text-gray-400">{language}</span>
                   </div>
                 </div>
 
-                <div className="rounded-lg p-5 font-mono text-sm">
-                  {isEditing ? (
-                    <textarea
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      className="w-full h-[300px] bg-transparent border-0 text-green-400 font-mono resize-none p-0 focus-visible:ring-0 focus-visible:ring-offset-0 outline-none"
-                      style={{
-                        whiteSpace: "pre",
-                        color: "inherit",
-                        lineHeight: 1.5,
-                      }}
-                      placeholder="// Write your code here..."
-                    />
-                  ) : (
-                    <pre className="text-left whitespace-pre overflow-x-auto">
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="font-medium text-white truncate">
+                      {title || "Untitled Snippet"}
+                    </h4>
+                    <p className="text-sm text-gray-400 line-clamp-2">
+                      {description || "No description provided"}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
+                    <pre className="text-xs text-gray-300 font-mono leading-relaxed overflow-hidden">
                       <code>
-                        {code.split("\n").map((line, index) => {
-                          // Handle comments (ensure they are in English)
-                          if (line.trim().startsWith("//")) {
-                            return (
-                              <div key={index}>
-                                <span className="text-gray-500">{line}</span>
-                              </div>
-                            );
-                          }
-
-                          // Process HTML tags, CSS, and other code
-                          if (line.includes("<button")) {
-                            return (
-                              <div key={index}>
-                                <span className="text-red-400">{"<"}</span>
-                                <span className="text-orange-400">button </span>
-                                <span className="text-yellow-400">class</span>
-                                <span className="text-white">{"="}</span>
-                                <span className="text-green-400">
-                                  {'"btn"'}{" "}
-                                </span>
-                                <span className="text-yellow-400">onclick</span>
-                                <span className="text-white">{"="}</span>
-                                <span className="text-green-400">
-                                  {
-                                    "\"this.style.backgroundColor='#'+Math.floor(Math.random()*16777215).toString(16)\""
-                                  }
-                                </span>
-                                <span className="text-red-400">{">"}</span>
-                                <span className="text-white">Click</span>
-                                <span className="text-red-400">{"</"}</span>
-                                <span className="text-orange-400">button</span>
-                                <span className="text-red-400">{">"}</span>
-                              </div>
-                            );
-                          }
-
-                          if (line.includes("<style>")) {
-                            return (
-                              <div key={index}>
-                                <span className="text-red-400">{"<"}</span>
-                                <span className="text-orange-400">style</span>
-                                <span className="text-red-400">{">"}</span>
-                              </div>
-                            );
-                          }
-
-                          if (line.includes(".btn {")) {
-                            return (
-                              <div key={index}>
-                                <span className="text-yellow-400">
-                                  {".btn"}{" "}
-                                </span>
-                                <span className="text-white">{"{"}</span>
-                              </div>
-                            );
-                          }
-
-                          // CSS properties - fix for additional semicolon issue
-                          if (
-                            line.trim().startsWith("padding:") ||
-                            line.trim().startsWith("font-size:") ||
-                            line.trim().startsWith("border:") ||
-                            line.trim().startsWith("cursor:") ||
-                            line.trim().startsWith("background:") ||
-                            line.trim().startsWith("color:") ||
-                            line.trim().startsWith("border-radius:") ||
-                            line.trim().startsWith("transition:")
-                          ) {
-                            const [property, value] = line.trim().split(":");
-                            // Check if value already has a semicolon to prevent duplicates
-                            const valueWithoutSemicolon = value
-                              .trim()
-                              .endsWith(";")
-                              ? value.trim().slice(0, -1)
-                              : value.trim();
-
-                            return (
-                              <div key={index}>
-                                <span className="text-green-400">
-                                  {`  ${property}:`}{" "}
-                                </span>
-                                <span className="text-orange-400">
-                                  {valueWithoutSemicolon}
-                                </span>
-                                <span className="text-white">;</span>
-                              </div>
-                            );
-                          }
-
-                          if (line.trim() === "}") {
-                            return (
-                              <div key={index}>
-                                <span className="text-white">{"}"}</span>
-                              </div>
-                            );
-                          }
-
-                          if (line.includes("</style>")) {
-                            return (
-                              <div key={index}>
-                                <span className="text-red-400">{"</"}</span>
-                                <span className="text-orange-400">style</span>
-                                <span className="text-red-400">{">"}</span>
-                              </div>
-                            );
-                          }
-
-                          // Default for any other lines
-                          return <div key={index}>{line}</div>;
-                        })}
+                        {code.split("\n").slice(0, 8).join("\n")}
+                        {code.split("\n").length > 8 ? "\n..." : ""}
                       </code>
                     </pre>
-                  )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span>Just now</span>
+                    <div className="flex items-center gap-3">
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />0
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Copy className="w-3 h-3" />0
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          <div className="justify-start w-full max-w-[62.5rem] mx-auto flex items-center gap-4 m-10 mb-20">
-            <Button
-              variant="outline"
-              className="bg-[##100720] border-[#333333] text-gray-300 h-10 flex items-center gap-1 hover:bg-[#1A1A1A] hover:text-white transition-colors rounded-lg"
-              onClick={() => {
-                // Logic to navigate back to the previous page
-                window.history.back();
-              }}
-            >
-              <MoveLeft className="mr-1" />
-              <span className="text-gray-400"> Back to snippets</span>
-            </Button>
-            <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transform transition-all duration-200 hover:scale-105 shadow-lg">
-              + New Snippet
-            </Button>
-          </div>
+          </motion.div>
+
+          {/* Code Editor Section */}
+          <motion.div
+            className="bg-gradient-to-r from-slate-800/40 to-slate-900/40 backdrop-blur-sm border border-slate-700/50 rounded-2xl overflow-hidden"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.0, duration: 0.7 }}
+          >
+            {/* Editor Header */}
+            <div className="flex items-center justify-between p-6 border-b border-slate-700/50 bg-slate-800/30">
+              <div className="flex items-center gap-3">
+                <Code2 className="w-5 h-5 text-teal-400" />
+                <h2 className="text-lg font-semibold text-white">
+                  Code Editor
+                </h2>
+                <span className="text-sm text-gray-400">
+                  ({code.split("\n").length} lines)
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <motion.button
+                  onClick={handleCopyCode}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 text-sm ${
+                    isCopied
+                      ? "bg-green-500/20 border border-green-500/50 text-green-400"
+                      : "bg-slate-700/50 border border-slate-600/50 text-gray-400 hover:text-teal-400 hover:border-teal-500/50"
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Copy className="w-4 h-4" />
+                  {isCopied ? "Copied!" : "Copy"}
+                </motion.button>
+
+                <motion.button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 text-sm ${
+                    isEditing
+                      ? "bg-teal-500/20 border border-teal-500/50 text-teal-400"
+                      : "bg-slate-700/50 border border-slate-600/50 text-gray-400 hover:text-teal-400 hover:border-teal-500/50"
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Edit className="w-4 h-4" />
+                  {isEditing ? "Preview" : "Edit"}
+                </motion.button>
+
+                <motion.button
+                  onClick={handleToggleBookmark}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg transition-all duration-300 text-sm ${
+                    isBookmarked
+                      ? "bg-yellow-500/20 border border-yellow-500/50 text-yellow-400"
+                      : "bg-slate-700/50 border border-slate-600/50 text-gray-400 hover:text-yellow-400 hover:border-yellow-500/50"
+                  }`}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isBookmarked ? (
+                    <Bookmark className="w-4 h-4 fill-current" />
+                  ) : (
+                    <BookmarkX className="w-4 h-4" />
+                  )}
+                  {isBookmarked ? "Saved" : "Save"}
+                </motion.button>
+              </div>
+            </div>
+
+            {/* Code Content */}
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 to-blue-500/5 opacity-50" />
+              {isEditing ? (
+                <Textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="w-full min-h-[400px] bg-slate-900/50 border-0 text-gray-300 font-mono text-sm resize-none p-6 focus:ring-0 focus:outline-none relative z-10"
+                  placeholder="// Start coding your amazing snippet here..."
+                  style={{
+                    whiteSpace: "pre",
+                    lineHeight: 1.6,
+                  }}
+                />
+              ) : (
+                <pre className="p-6 bg-slate-900/50 text-gray-300 font-mono text-sm leading-relaxed overflow-x-auto relative z-10 min-h-[400px]">
+                  <code className="language-javascript">{code}</code>
+                </pre>
+              )}
+            </div>
+          </motion.div>
+
+          {/* Action Buttons */}
+          <motion.div
+            className="flex flex-col sm:flex-row items-center justify-between gap-6 mt-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.7 }}
+          >
+            <div className="flex items-center gap-4">
+              <Link href="/snippet">
+                <Button
+                  variant="outline"
+                  className="bg-slate-800/50 border-slate-600/50 text-gray-400 hover:text-teal-400 hover:border-slate-500/50"
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Snippets
+                </Button>
+              </Link>
+
+              <Button
+                variant="outline"
+                className="bg-slate-800/50 border-slate-600/50 text-gray-400 hover:text-blue-400 hover:border-blue-500/50"
+              >
+                <Share2 className="w-4 h-4 mr-2" />
+                Share/Export
+              </Button>
+            </div>
+
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button
+                onClick={handleSave}
+                disabled={!isSaveEnabled || !title.trim() || !code.trim()}
+                className={`${
+                  showSaveSuccess
+                    ? "bg-green-500 hover:bg-green-600"
+                    : "bg-gradient-to-r from-teal-400 to-blue-500 hover:from-teal-500 hover:to-blue-600"
+                } text-black font-semibold px-8 py-3 rounded-full shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:shadow-[0_0_35px_rgba(56,189,248,0.5)] transition-all duration-300 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {showSaveSuccess ? (
+                  <>
+                    <Check className="w-5 h-5" />
+                    Saved to Blockchain!
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-5 h-5" />
+                    Save to Blockchain
+                  </>
+                )}
+              </Button>
+            </motion.div>
+          </motion.div>
+
+          {/* Tips Section */}
+          <motion.div
+            className="mt-12 bg-gradient-to-r from-teal-500/10 to-blue-500/10 backdrop-blur-sm border border-teal-500/20 rounded-2xl p-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4, duration: 0.7 }}
+          >
+            <div className="flex items-start gap-4">
+              <Sparkles className="w-6 h-6 text-teal-400 mt-1 flex-shrink-0" />
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Pro Tips for Better Snippets
+                </h3>
+                <ul className="text-gray-300 space-y-1 text-sm">
+                  <li>
+                    • Use descriptive titles and add comments to make your code
+                    more understandable
+                  </li>
+                  <li>
+                    • Tag your snippets appropriately to help others discover
+                    them
+                  </li>
+                  <li>
+                    • Public snippets are stored on IPFS for permanent,
+                    decentralized access
+                  </li>
+                  <li>
+                    • Private snippets are encrypted and only accessible to you
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </motion.div>
         </div>
-      </div>
+      </main>
+
       <Footer />
-    </>
+    </div>
   );
 };
 

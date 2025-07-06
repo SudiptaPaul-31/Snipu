@@ -1,4 +1,3 @@
-import React from "react";
 import { prisma } from "@/lib/prisma";
 import EditSnippetForm from "@/components/EditSnippetForm";
 import Link from "next/link";
@@ -8,7 +7,9 @@ const EditPageSnippet = async ({
 }: {
   params: Promise<{ id: string }>;
 }) => {
-  const id = parseInt((await params).id);
+  const resolvedParams = await params;
+  const id = Number.parseInt(resolvedParams.id);
+
   const snippet = await prisma.snippet.findUnique({
     where: {
       id,

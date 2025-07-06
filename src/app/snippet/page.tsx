@@ -4,238 +4,39 @@ import Header from "@/components/Navbar/Navbar";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { SnippetCard } from "@/components/SnippetCard";
-import NoSnippetFound from "@/components/NoSnippetFound";
-import { Snippet } from "../types";
+import type { Snippet } from "../types";
 import { useEffect, useMemo, useState } from "react";
 import Footer from "@/components/Footer";
-import Loading from "@/components/Loading";
 import { SearchAndFilterSection } from "@/components/SearchAndFilterSection";
-import { prisma } from "@/lib/prisma";
-import { toast } from "@/hooks/use-toast";
-
-interface PaginatedResponse {
-  snippets: Snippet[];
-  pagination: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-}
+import { motion } from "framer-motion";
+import { Code2, Plus, Sparkles } from "lucide-react";
+import { mockSnippets } from "@/lib/mockData";
 
 export default function Home() {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  // const [bookmarkingIds, setBookmarkingIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [languageFilter, setLanguageFilter] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const fetchSnippets = async () => {
-    try {
-      // const snippets = await prisma.snippet.findMany();
-      const response = await fetch("/api/snippets");
-      if (!response.ok) {
-        throw new Error("Failed to fetch snippets");
-      }
-      const data: PaginatedResponse = await response.json();
-      setSnippets(data.snippets);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load snippets");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // useEffect(() => {
-  //   fetchSnippets();
-  // }, []);
-
   useEffect(() => {
-    const fetchSnippets = async () => {
+    // Simulate loading and use mock data
+    const loadSnippets = async () => {
       try {
-        const mockSnippets: Snippet[] = [
-          {
-            id: 1,
-            title: "React useState Example",
-            code: "const [state, setState] = useState(initialState);",
-            language: "JavaScript",
-            authorId: "user1",
-            tags: ["React", "Hooks"],
-            createdAt: new Date("2023-05-15"),
-            comments: [
-              {
-                id: 1,
-                content: "Great example of useState!",
-                createdAt: new Date("2023-05-16"),
-                updatedAt: new Date("2023-05-16"),
-                authorId: "user2",
-                snippetId: 1,
-              },
-            ],
-            author: {
-              id: "user1",
-              walletAddress: "0x71C...3b5",
-              username: "react_dev",
-              bio: "React enthusiast",
-              createdAt: new Date("2023-01-10"),
-              updatedAt: new Date("2023-06-20"),
-            },
-            views: 24,
-            copies: 12,
-          },
-          {
-            id: 2,
-            title: "Python List Comprehension",
-            code: "[x for x in range(10) if x % 2 == 0]",
-            language: "Python",
-            authorId: "user3",
-            tags: ["Python", "Lists"],
-            createdAt: new Date("2023-06-20"),
-            author: {
-              id: "user3",
-              walletAddress: "0x92D...7f1",
-              username: "python_lover",
-              createdAt: new Date("2023-02-15"),
-              updatedAt: new Date("2023-07-01"),
-            },
-            views: 24,
-            copies: 12,
-          },
-          {
-            id: 3,
-            title: "JavaScript Fetch API",
-            code: "fetch('/api/data').then(res => res.json());",
-            language: "JavaScript",
-            authorId: "user1",
-            tags: ["API", "Fetch"],
-            createdAt: new Date("2023-07-10"),
-            comments: [
-              {
-                id: 2,
-                content: "Don't forget error handling!",
-                createdAt: new Date("2023-07-11"),
-                updatedAt: new Date("2023-07-11"),
-                authorId: "user4",
-                snippetId: 3,
-              },
-            ],
-            views: 0,
-            copies: 0,
-          },
-          {
-            id: 4,
-            title: "CSS Center with Flexbox",
-            code: "display: flex;\njustify-content: center;\nalign-items: center;",
-            language: "CSS",
-            authorId: "user2",
-            tags: ["CSS", "Flexbox"],
-            createdAt: new Date("2023-08-05"),
-            author: {
-              id: "user2",
-              walletAddress: "0x45E...9c2",
-              username: "css_wizard",
-              bio: "CSS magician",
-              createdAt: new Date("2023-01-25"),
-              updatedAt: new Date("2023-08-10"),
-            },
-            views: 0,
-            copies: 0,
-          },
-          {
-            id: 5,
-            title: "SQL Inner Join",
-            code: "SELECT * FROM users\nINNER JOIN orders\nON users.id = orders.user_id;",
-            language: "SQL",
-            authorId: "user4",
-            tags: ["SQL", "Join"],
-            createdAt: new Date("2023-09-12"),
-            comments: [
-              {
-                id: 3,
-                content: "You might want to specify columns instead of using *",
-                createdAt: new Date("2023-09-13"),
-                updatedAt: new Date("2023-09-13"),
-                authorId: "user3",
-                snippetId: 5,
-              },
-            ],
-            views: 1,
-            copies: 0,
-          },
-          {
-            id: 6,
-            title: "TypeScript Interface Example",
-            code: "interface User {\n  name: string;\n  age: number;\n}",
-            language: "TypeScript",
-            authorId: "user5",
-            tags: ["TypeScript", "Types"],
-            createdAt: new Date("2023-10-01"),
-            author: {
-              id: "user5",
-              walletAddress: "0x63F...4a8",
-              username: "ts_expert",
-              bio: "TypeScript advocate",
-              createdAt: new Date("2023-03-18"),
-              updatedAt: new Date("2023-10-05"),
-            },
-            views: 0,
-            copies: 1,
-          },
-          {
-            id: 7,
-            title: "Rust Error Handling",
-            code: 'fn divide(a: i32, b: i32) -> Result<i32, String> {\n  if b == 0 {\n    return Err(String::from("Cannot divide by zero"));\n  }\n  Ok(a / b)\n}',
-            language: "Rust",
-            authorId: "user6",
-            tags: ["Rust", "Error"],
-            createdAt: new Date("2023-10-15"),
-            comments: [
-              {
-                id: 4,
-                content: "Clean error handling example!",
-                createdAt: new Date("2023-10-16"),
-                updatedAt: new Date("2023-10-16"),
-                authorId: "user1",
-                snippetId: 7,
-              },
-            ],
-            views: 0,
-            copies: 0,
-          },
-          {
-            id: 8,
-            title: "Go HTTP Server",
-            code: 'package main\n\nimport (\n  "fmt"\n  "net/http"\n)\n\nfunc handler(w http.ResponseWriter, r *http.Request) {\n  fmt.Fprintf(w, "Hello, World!")\n}',
-            language: "Go",
-            authorId: "user7",
-            tags: ["Go", "HTTP"],
-            createdAt: new Date("2023-11-01"),
-            author: {
-              id: "user7",
-              walletAddress: "0x87G...5b9",
-              username: "gopher",
-              createdAt: new Date("2023-04-22"),
-              updatedAt: new Date("2023-11-05"),
-            },
-            views: 10,
-            copies: 10,
-          },
-        ];
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         setSnippets(mockSnippets);
       } catch (error) {
-        console.error("Error fetching snippets:", error);
+        console.error("Error loading snippets:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSnippets();
+    loadSnippets();
   }, []);
 
   // Memoized filtered snippets
-
   const filteredSnippets = useMemo(() => {
     return snippets.filter((snippet) => {
       const matchesSearch =
@@ -243,8 +44,14 @@ export default function Home() {
           ? true
           : snippet.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
             snippet.tags.some((tag) =>
-              tag.toLowerCase().includes(searchQuery.toLowerCase()),
-            );
+              tag.toLowerCase().includes(searchQuery.toLowerCase())
+            ) ||
+            snippet.language
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase()) ||
+            snippet.description
+              ?.toLowerCase()
+              .includes(searchQuery.toLowerCase());
 
       const matchesLanguage =
         languageFilter === ""
@@ -255,130 +62,97 @@ export default function Home() {
     });
   }, [snippets, searchQuery, languageFilter]);
 
-  // const handleToggleBookmark = async (
-  //   e: React.MouseEvent,
-  //   snippet: Snippet
-  // ) => {
-  //   e.preventDefault(); // Prevent navigation
-  //   setBookmarkingIds((prev) => new Set(prev).add(snippet.id.toString()));
-
-  //   try {
-  //     const response = await fetch("/api/snippets", {
-  //       method: "PATCH",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       body: JSON.stringify({
-  //         id: snippet.id,
-  //         isBookmarked: !snippet.isBookmarked,
-  //       }),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to update bookmark");
-  //     }
-
-  //     toast({
-  //       title: snippet.isBookmarked
-  //         ? "Removed from bookmarks"
-  //         : "Added to bookmarks",
-  //       description: snippet.isBookmarked
-  //         ? "Snippet removed from your bookmarks"
-  //         : "Snippet saved to your bookmarks",
-  //       duration: 2000,
-  //     });
-
-  //     // Refresh snippets after 2 seconds
-  //     setTimeout(() => {
-  //       fetchSnippets();
-  //     }, 2000);
-  //   } catch (error) {
-  //     console.error("Error toggling bookmark:", error);
-  //     toast({
-  //       title: "Error",
-  //       description: "Failed to update bookmark status",
-  //       variant: "destructive",
-  //       duration: 2000,
-  //     });
-  //   } finally {
-  //     setBookmarkingIds((prev) => {
-  //       const updated = new Set(prev);
-  //       updated.delete(snippet.id.toString());
-  //       return updated;
-  //     });
-  //   }
-  // };
-  const handleToggleBookmark = async (
-    e: React.MouseEvent,
-    snippet: Snippet,
-  ) => {
-    e.preventDefault(); // Prevent navigation since star is inside Link
-
-    try {
-      const response = await fetch("/api/snippets", {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          id: snippet.id,
-          isBookmarked: !snippet.isBookmarked,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to update bookmark");
-      }
-
-      toast({
-        title: snippet.isBookmarked
-          ? "Removed from bookmarks"
-          : "Added to bookmarks",
-        description: snippet.isBookmarked
-          ? "Snippet removed from your bookmarks"
-          : "Snippet saved to your bookmarks",
-        duration: 2000,
-      });
-
-      // Refresh snippets after 2 seconds
-      setTimeout(() => {
-        fetchSnippets();
-      }, 2000);
-    } catch (error) {
-      console.error("Error toggling bookmark:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update bookmark status",
-        variant: "destructive",
-        duration: 2000,
-      });
-    }
-  };
-
   const toggleViewMode = () => {
     setViewMode((prev) => (prev === "grid" ? "list" : "grid"));
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-gradient-to-b from-[#0a1929] to-black text-white overflow-hidden relative">
+      {/* Animated background effects */}
+      <div className="absolute inset-0 overflow-hidden -z-10">
+        <div className="absolute top-20 left-1/4 w-[500px] h-[500px] bg-teal-500 opacity-10 rounded-full blur-[150px]"></div>
+        <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-blue-600 opacity-8 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-20 left-1/3 w-[300px] h-[300px] bg-cyan-400 opacity-8 rounded-full blur-[100px]"></div>
+      </div>
+
       <Header />
-      <div className="bg-hero-gradient bg-[#121212] w-full  sm:p-10 p-10">
-        <div className="w-full min-h-screen mb-10">
-          <div className="max-w-[75rem] mx-auto animate-fade-in">
-            <div className="text-center mb-12">
-              <h1 className="md:text-5xl text-2xl font-extrabold text-white mt-16">
-                Your Collection of Code Snippets{" "}
-              </h1>
-              <p className="md:text-lg mt-4 text-sm text-white">
-                Store, organize and share your code snippets efficiently{" "}
-              </p>
+
+      <main className="container mx-auto px-4 py-8">
+        {/* Hero Section */}
+        <motion.div
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <motion.div
+            className="inline-flex items-center justify-center mb-6"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            <span className="text-teal-400 border-2 border-teal-700 text-sm px-4 rounded-full py-1 flex items-center gap-2">
+              <Code2 className="w-4 h-4" />
+              Code Collection
+            </span>
+          </motion.div>
+
+          <motion.h1
+            className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white via-teal-200 to-cyan-400 bg-clip-text text-transparent"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.7 }}
+          >
+            Your Code Snippets
+          </motion.h1>
+
+          <motion.p
+            className="text-xl text-gray-300 max-w-2xl mx-auto mb-8"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.7 }}
+          >
+            Store, organize and share your code snippets efficiently with
+            blockchain-powered security
+          </motion.p>
+        </motion.div>
+
+        {/* Stats Section */}
+        <motion.div
+          className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.8, duration: 0.7 }}
+        >
+          <div className="bg-gradient-to-r from-teal-500/10 to-cyan-500/10 backdrop-blur-sm border border-teal-500/20 rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-teal-400 mb-2">
+              {snippets.length}
             </div>
-            <div>
-              <h2 className="text-3xl font-semibold text-white mb-5">
-                My Snippets
-              </h2>
+            <div className="text-gray-300">Total Snippets</div>
+          </div>
+          <div className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20 rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-blue-400 mb-2">
+              {new Set(snippets.map((s) => s.language)).size}
             </div>
-            <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+            <div className="text-gray-300">Languages</div>
+          </div>
+          <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm border border-purple-500/20 rounded-xl p-6 text-center">
+            <div className="text-3xl font-bold text-purple-400 mb-2">
+              {snippets.reduce((acc, s) => acc + (s.views || 0), 0)}
+            </div>
+            <div className="text-gray-300">Total Views</div>
+          </div>
+        </motion.div>
+
+        {/* Search and Filter Section */}
+        <motion.div
+          className="bg-gradient-to-r from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-6 mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 1.0, duration: 0.7 }}
+        >
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex-1 w-full lg:w-auto">
               <SearchAndFilterSection
                 searchQuery={searchQuery}
                 languageFilter={languageFilter}
@@ -387,39 +161,120 @@ export default function Home() {
                 onLanguageChange={setLanguageFilter}
                 onViewModeToggle={toggleViewMode}
               />
+            </div>
+
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="w-full md:w-fit"
+            >
               <Link href="/snippet/new">
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-6 rounded-lg transform transition-all duration-200 hover:scale-105 shadow-lg">
-                  + New Snippet
+                <Button className="h-full w-full bg-gradient-to-r from-teal-400 to-blue-500 hover:from-teal-500 hover:to-blue-600 text-black font-semibold px-8 py-3 rounded-2xl shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:shadow-[0_0_35px_rgba(56,189,248,0.5)] transition-all duration-300 flex items-center gap-2">
+                  <Plus className="w-5 h-5" />
+                  New Snippet
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Snippets Section */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2, duration: 0.7 }}
+        >
+          {loading ? (
+            <div className="flex justify-center items-center py-20">
+              <motion.div
+                className="w-16 h-16 border-4 border-teal-400 border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{
+                  duration: 1,
+                  repeat: Number.POSITIVE_INFINITY,
+                  ease: "linear",
+                }}
+              />
+            </div>
+          ) : filteredSnippets.length > 0 ? (
+            <div
+              className={
+                viewMode === "grid"
+                  ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                  : "space-y-6"
+              }
+            >
+              {filteredSnippets.map((snippet, index) => (
+                <motion.div
+                  key={snippet.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.4 + index * 0.1, duration: 0.5 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <SnippetCard snippet={snippet} viewMode={viewMode} />
+                </motion.div>
+              ))}
+            </div>
+          ) : (
+            <motion.div
+              className="text-center py-20"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 1.4, duration: 0.7 }}
+            >
+              <div className="bg-gradient-to-r from-slate-800/30 to-slate-900/30 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-12 max-w-md mx-auto">
+                <div className="w-20 h-20 bg-gradient-to-r from-teal-400 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Code2 className="w-10 h-10 text-black" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  No snippets found
+                </h3>
+                <p className="text-gray-400 mb-6">
+                  {searchQuery || languageFilter
+                    ? "Try adjusting your search or filter criteria"
+                    : "Create your first code snippet to get started"}
+                </p>
+                <Link href="/snippet/new">
+                  <Button className="bg-gradient-to-r from-teal-400 to-blue-500 hover:from-teal-500 hover:to-blue-600 text-black font-semibold px-6 py-2 rounded-full">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Create Snippet
+                  </Button>
+                </Link>
+              </div>
+            </motion.div>
+          )}
+        </motion.div>
+
+        {/* Call to Action */}
+        {filteredSnippets.length > 0 && (
+          <motion.div
+            className="text-center mt-16 py-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.6, duration: 0.7 }}
+          >
+            <div className="bg-gradient-to-r from-teal-500/10 to-blue-500/10 backdrop-blur-sm border border-teal-500/20 rounded-2xl p-8 max-w-2xl mx-auto">
+              <Sparkles className="w-12 h-12 text-teal-400 mx-auto mb-4" />
+              <h3 className="text-2xl font-bold text-white mb-4">
+                Ready to share your code?
+              </h3>
+              <p className="text-gray-300 mb-6">
+                Join thousands of developers sharing and discovering amazing
+                code snippets
+              </p>
+              <Link href="/snippet/new">
+                <Button className="bg-gradient-to-r from-teal-400 to-blue-500 hover:from-teal-500 hover:to-blue-600 text-black font-semibold px-8 py-3 rounded-full shadow-[0_0_25px_rgba(56,189,248,0.3)] hover:shadow-[0_0_35px_rgba(56,189,248,0.5)] transition-all duration-300">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create New Snippet
                 </Button>
               </Link>
             </div>
-            <div className="space-y-4">
-              <div
-                className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                    : "flex-row gap-4"
-                }
-              >
-                {loading ? (
-                  <Loading />
-                ) : snippets.length > 0 ? (
-                  filteredSnippets.map((snippet) => (
-                    <SnippetCard
-                      key={snippet.id}
-                      snippet={snippet}
-                      viewMode={viewMode}
-                    />
-                  ))
-                ) : (
-                  <NoSnippetFound />
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+          </motion.div>
+        )}
+      </main>
+
       <Footer />
-    </>
+    </div>
   );
 }

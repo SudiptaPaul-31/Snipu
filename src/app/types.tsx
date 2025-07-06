@@ -3,6 +3,7 @@ export interface Snippet {
   title: string;
   code: string;
   language: string;
+  description?: string;
   authorId: string;
   tags: string[];
   createdAt: Date;
