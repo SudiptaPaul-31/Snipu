@@ -1,8 +1,8 @@
-"use client"
-import { CodeXml, Plus, Sparkles } from "lucide-react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { Button } from "./ui/button"
+"use client";
+import { CodeXml, Plus, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { Button } from "./ui/button";
 
 function NoSnippetFound() {
   return (
@@ -62,8 +62,8 @@ function NoSnippetFound() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5 }}
         >
-          Start building your collection of code snippets. Create, organize, and share your code efficiently with the
-          power of blockchain.
+          Start building your collection of code snippets. Create, organize, and
+          share your code efficiently with the power of blockchain.
         </motion.p>
 
         {/* CTA Button */}
@@ -86,7 +86,7 @@ function NoSnippetFound() {
         <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-teal-500/5 to-blue-500/5 pointer-events-none" />
       </div>
     </motion.div>
-  )
+  );
 }
 
-export default NoSnippetFound
+export default NoSnippetFound;

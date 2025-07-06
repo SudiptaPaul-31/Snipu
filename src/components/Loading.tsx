@@ -1,6 +1,6 @@
-"use client"
-import { Code2 } from "lucide-react"
-import { motion } from "framer-motion"
+"use client";
+import { Code2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 function Loading() {
   return (
@@ -16,7 +16,11 @@ function Loading() {
           <motion.div
             className="w-16 h-16 border-4 border-teal-400/30 border-t-teal-400 rounded-full"
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+            transition={{
+              duration: 1,
+              repeat: Number.POSITIVE_INFINITY,
+              ease: "linear",
+            }}
           />
 
           {/* Center icon */}
@@ -44,8 +48,12 @@ function Loading() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <h3 className="text-lg font-semibold text-white mb-2">Loading Snippets</h3>
-          <p className="text-gray-400 text-sm">Fetching your code collection...</p>
+          <h3 className="text-lg font-semibold text-white mb-2">
+            Loading Snippets
+          </h3>
+          <p className="text-gray-400 text-sm">
+            Fetching your code collection...
+          </p>
         </motion.div>
 
         {/* Animated dots */}
@@ -69,7 +77,7 @@ function Loading() {
         </div>
       </motion.div>
     </div>
-  )
+  );
 }
 
-export default Loading
+export default Loading;

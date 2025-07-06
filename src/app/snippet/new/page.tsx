@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   ChevronDown,
   Code2,
@@ -21,20 +21,25 @@ import {
   Eye,
   Sparkles,
   FileCode,
-} from "lucide-react"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { toast } from "@/hooks/use-toast"
-import Header from "@/components/Navbar/Navbar"
-import Footer from "@/components/Footer"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import type { JSX } from "react/jsx-runtime"
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "@/hooks/use-toast";
+import Header from "@/components/Navbar/Navbar";
+import Footer from "@/components/Footer";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import type { JSX } from "react/jsx-runtime";
 
 const CreateSnippetPage = () => {
-  const [language, setLanguage] = useState("JavaScript")
-  const [visibility, setVisibility] = useState("Public")
-  const [description, setDescription] = useState("")
-  const [title, setTitle] = useState("")
+  const [language, setLanguage] = useState("JavaScript");
+  const [visibility, setVisibility] = useState("Public");
+  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState("");
   const [code, setCode] = useState(`// Welcome to Snipu! 
 // Start writing your amazing code here...
 
@@ -42,13 +47,13 @@ function greetUser(name) {
   return \`Hello, \${name}! Welcome to the future of code sharing.\`;
 }
 
-console.log(greetUser("Developer"));`)
-  const [isEditing, setIsEditing] = useState(true)
-  const [isBookmarked, setIsBookmarked] = useState(false)
-  const [isSaveEnabled, setIsSaveEnabled] = useState(true)
-  const [showSaveSuccess, setShowSaveSuccess] = useState(false)
-  const [tags, setTags] = useState<string[]>(["JavaScript"])
-  const [isCopied, setIsCopied] = useState(false)
+console.log(greetUser("Developer"));`);
+  const [isEditing, setIsEditing] = useState(true);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [isSaveEnabled, setIsSaveEnabled] = useState(true);
+  const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [tags, setTags] = useState<string[]>(["JavaScript"]);
+  const [isCopied, setIsCopied] = useState(false);
 
   const getTagColor = (tagName: string): string => {
     const colors: Record<string, string> = {
@@ -60,9 +65,9 @@ console.log(greetUser("Developer"));`)
       Python: "from-blue-600 to-indigo-600",
       CSS: "from-pink-400 to-purple-500",
       HTML: "from-orange-400 to-red-500",
-    }
-    return colors[tagName] || "from-gray-400 to-gray-600"
-  }
+    };
+    return colors[tagName] || "from-gray-400 to-gray-600";
+  };
 
   const getLanguageIcon = (lang: string) => {
     const icons: Record<string, JSX.Element> = {
@@ -96,9 +101,9 @@ console.log(greetUser("Developer"));`)
           A
         </div>
       ),
-    }
-    return icons[lang] || <FileCode className="w-5 h-5 text-teal-400" />
-  }
+    };
+    return icons[lang] || <FileCode className="w-5 h-5 text-teal-400" />;
+  };
 
   const handleSave = async () => {
     if (!title.trim()) {
@@ -107,8 +112,8 @@ console.log(greetUser("Developer"));`)
         description: "Please enter a title for your snippet",
         variant: "destructive",
         duration: 3000,
-      })
-      return
+      });
+      return;
     }
 
     if (!code.trim()) {
@@ -117,8 +122,8 @@ console.log(greetUser("Developer"));`)
         description: "Please enter some code for your snippet",
         variant: "destructive",
         duration: 3000,
-      })
-      return
+      });
+      return;
     }
 
     try {
@@ -136,66 +141,68 @@ console.log(greetUser("Developer"));`)
           tags,
           visibility,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to save snippet")
+        throw new Error("Failed to save snippet");
       }
 
-      const savedSnippet = await response.json()
-      console.log("Snippet saved:", savedSnippet)
+      const savedSnippet = await response.json();
+      console.log("Snippet saved:", savedSnippet);
 
-      setShowSaveSuccess(true)
-      setIsSaveEnabled(false)
+      setShowSaveSuccess(true);
+      setIsSaveEnabled(false);
 
       toast({
         title: "Success!",
         description: "Your snippet has been saved to the blockchain",
         duration: 3000,
-      })
+      });
 
       setTimeout(() => {
-        setShowSaveSuccess(false)
-      }, 3000)
+        setShowSaveSuccess(false);
+      }, 3000);
     } catch (error) {
-      console.error("Error saving snippet:", error)
+      console.error("Error saving snippet:", error);
       toast({
         title: "Error",
         description: "Failed to save snippet. Please try again.",
         duration: 3000,
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleCopyCode = () => {
-    navigator.clipboard.writeText(code)
-    setIsCopied(true)
+    navigator.clipboard.writeText(code);
+    setIsCopied(true);
     toast({
       title: "Copied!",
       description: "Code snippet copied to clipboard",
       duration: 2000,
-    })
+    });
 
     setTimeout(() => {
-      setIsCopied(false)
-    }, 2000)
-  }
+      setIsCopied(false);
+    }, 2000);
+  };
 
   const handleAddTag = (newTag: string) => {
     if (!tags.includes(newTag)) {
-      setTags([newTag])
+      setTags([newTag]);
     }
-  }
+  };
 
   const handleToggleBookmark = () => {
-    setIsBookmarked(!isBookmarked)
+    setIsBookmarked(!isBookmarked);
     toast({
       title: isBookmarked ? "Removed from bookmarks" : "Added to bookmarks",
-      description: isBookmarked ? "Snippet removed from your bookmarks" : "Snippet saved to your bookmarks",
+      description: isBookmarked
+        ? "Snippet removed from your bookmarks"
+        : "Snippet saved to your bookmarks",
       duration: 2000,
-    })
-  }
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a1929] to-black text-white overflow-hidden relative">
@@ -260,8 +267,8 @@ console.log(greetUser("Developer"));`)
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.6, duration: 0.7 }}
             >
-              Create, store, and share your code snippets on the blockchain with enhanced security and global
-              accessibility
+              Create, store, and share your code snippets on the blockchain with
+              enhanced security and global accessibility
             </motion.p>
           </motion.div>
 
@@ -276,7 +283,9 @@ console.log(greetUser("Developer"));`)
               {/* Left Column - Metadata */}
               <div className="space-y-6">
                 <div>
-                  <Label className="text-lg font-semibold text-white mb-3 block">Title</Label>
+                  <Label className="text-lg font-semibold text-white mb-3 block">
+                    Title
+                  </Label>
                   <Input
                     placeholder="Enter a descriptive title for your snippet"
                     className="bg-slate-800/50 border-slate-600/50 text-white placeholder-gray-400 h-12 text-lg focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400/50 transition-all duration-300"
@@ -286,7 +295,9 @@ console.log(greetUser("Developer"));`)
                 </div>
 
                 <div>
-                  <Label className="text-lg font-semibold text-white mb-3 block">Description</Label>
+                  <Label className="text-lg font-semibold text-white mb-3 block">
+                    Description
+                  </Label>
                   <Textarea
                     placeholder="Describe what your code does and how to use it"
                     className="bg-slate-800/50 border-slate-600/50 text-white placeholder-gray-400 min-h-[120px] focus:ring-2 focus:ring-teal-400/50 focus:border-teal-400/50 transition-all duration-300 resize-none"
@@ -299,7 +310,9 @@ console.log(greetUser("Developer"));`)
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {/* Language Selector */}
                   <div>
-                    <Label className="text-sm font-medium text-gray-300 mb-2 block">Language</Label>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Language
+                    </Label>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -314,25 +327,34 @@ console.log(greetUser("Developer"));`)
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-full bg-slate-800 border-slate-700">
-                        {["JavaScript", "TypeScript", "Python", "HTML", "CSS", "React", "Vue", "Angular"].map(
-                          (lang) => (
-                            <DropdownMenuItem
-                              key={lang}
-                              onClick={() => setLanguage(lang)}
-                              className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
-                            >
-                              {getLanguageIcon(lang)}
-                              {lang}
-                            </DropdownMenuItem>
-                          ),
-                        )}
+                        {[
+                          "JavaScript",
+                          "TypeScript",
+                          "Python",
+                          "HTML",
+                          "CSS",
+                          "React",
+                          "Vue",
+                          "Angular",
+                        ].map((lang) => (
+                          <DropdownMenuItem
+                            key={lang}
+                            onClick={() => setLanguage(lang)}
+                            className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
+                          >
+                            {getLanguageIcon(lang)}
+                            {lang}
+                          </DropdownMenuItem>
+                        ))}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
 
                   {/* Framework/Tag Selector */}
                   <div>
-                    <Label className="text-sm font-medium text-gray-300 mb-2 block">Framework</Label>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Framework
+                    </Label>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -340,20 +362,35 @@ console.log(greetUser("Developer"));`)
                           className="w-full bg-slate-800/50 border-slate-600/50 text-white hover:bg-slate-700/50 hover:text-white justify-between"
                         >
                           <div className="flex items-center gap-2">
-                            <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(tags[0])}`} />
+                            <div
+                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(
+                                tags[0]
+                              )}`}
+                            />
                             <span>{tags[0]}</span>
                           </div>
                           <ChevronDown className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-slate-800 border-slate-700">
-                        {["React", "Vue", "Angular", "JavaScript", "TypeScript", "Python"].map((tag) => (
+                        {[
+                          "React",
+                          "Vue",
+                          "Angular",
+                          "JavaScript",
+                          "TypeScript",
+                          "Python",
+                        ].map((tag) => (
                           <DropdownMenuItem
                             key={tag}
                             onClick={() => handleAddTag(tag)}
                             className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
                           >
-                            <div className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(tag)}`} />
+                            <div
+                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(
+                                tag
+                              )}`}
+                            />
                             {tag}
                           </DropdownMenuItem>
                         ))}
@@ -363,7 +400,9 @@ console.log(greetUser("Developer"));`)
 
                   {/* Visibility Selector */}
                   <div>
-                    <Label className="text-sm font-medium text-gray-300 mb-2 block">Visibility</Label>
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Visibility
+                    </Label>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button
@@ -371,7 +410,11 @@ console.log(greetUser("Developer"));`)
                           className="w-full bg-slate-800/50 border-slate-600/50 text-white hover:bg-slate-700/50 hover:text-white justify-between"
                         >
                           <div className="flex items-center gap-2">
-                            {visibility === "Public" ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                            {visibility === "Public" ? (
+                              <Globe className="w-4 h-4" />
+                            ) : (
+                              <Lock className="w-4 h-4" />
+                            )}
                             <span>{visibility}</span>
                           </div>
                           <ChevronDown className="h-4 w-4" />
@@ -406,15 +449,23 @@ console.log(greetUser("Developer"));`)
                     Live Preview
                   </h3>
                   <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full bg-gradient-to-r ${getTagColor(language)}`} />
+                    <div
+                      className={`w-3 h-3 rounded-full bg-gradient-to-r ${getTagColor(
+                        language
+                      )}`}
+                    />
                     <span className="text-sm text-gray-400">{language}</span>
                   </div>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <h4 className="font-medium text-white truncate">{title || "Untitled Snippet"}</h4>
-                    <p className="text-sm text-gray-400 line-clamp-2">{description || "No description provided"}</p>
+                    <h4 className="font-medium text-white truncate">
+                      {title || "Untitled Snippet"}
+                    </h4>
+                    <p className="text-sm text-gray-400 line-clamp-2">
+                      {description || "No description provided"}
+                    </p>
                   </div>
 
                   <div className="bg-slate-800/50 rounded-lg p-3 border border-slate-700/30">
@@ -453,8 +504,12 @@ console.log(greetUser("Developer"));`)
             <div className="flex items-center justify-between p-6 border-b border-slate-700/50 bg-slate-800/30">
               <div className="flex items-center gap-3">
                 <Code2 className="w-5 h-5 text-teal-400" />
-                <h2 className="text-lg font-semibold text-white">Code Editor</h2>
-                <span className="text-sm text-gray-400">({code.split("\n").length} lines)</span>
+                <h2 className="text-lg font-semibold text-white">
+                  Code Editor
+                </h2>
+                <span className="text-sm text-gray-400">
+                  ({code.split("\n").length} lines)
+                </span>
               </div>
 
               <div className="flex items-center gap-3">
@@ -496,7 +551,11 @@ console.log(greetUser("Developer"));`)
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {isBookmarked ? <Bookmark className="w-4 h-4 fill-current" /> : <BookmarkX className="w-4 h-4" />}
+                  {isBookmarked ? (
+                    <Bookmark className="w-4 h-4 fill-current" />
+                  ) : (
+                    <BookmarkX className="w-4 h-4" />
+                  )}
                   {isBookmarked ? "Saved" : "Save"}
                 </motion.button>
               </div>
@@ -586,12 +645,25 @@ console.log(greetUser("Developer"));`)
             <div className="flex items-start gap-4">
               <Sparkles className="w-6 h-6 text-teal-400 mt-1 flex-shrink-0" />
               <div>
-                <h3 className="text-lg font-semibold text-white mb-2">Pro Tips for Better Snippets</h3>
+                <h3 className="text-lg font-semibold text-white mb-2">
+                  Pro Tips for Better Snippets
+                </h3>
                 <ul className="text-gray-300 space-y-1 text-sm">
-                  <li>• Use descriptive titles and add comments to make your code more understandable</li>
-                  <li>• Tag your snippets appropriately to help others discover them</li>
-                  <li>• Public snippets are stored on IPFS for permanent, decentralized access</li>
-                  <li>• Private snippets are encrypted and only accessible to you</li>
+                  <li>
+                    • Use descriptive titles and add comments to make your code
+                    more understandable
+                  </li>
+                  <li>
+                    • Tag your snippets appropriately to help others discover
+                    them
+                  </li>
+                  <li>
+                    • Public snippets are stored on IPFS for permanent,
+                    decentralized access
+                  </li>
+                  <li>
+                    • Private snippets are encrypted and only accessible to you
+                  </li>
                 </ul>
               </div>
             </div>
@@ -601,7 +673,7 @@ console.log(greetUser("Developer"));`)
 
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default CreateSnippetPage
+export default CreateSnippetPage;
