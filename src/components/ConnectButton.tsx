@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from "react";
 import { useAccount, useDisconnect } from "@starknet-react/core";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { Wallet } from "lucide-react"; // <-- Import Lucide wallet icon
 
 const truncateAddress = (address: string) => {
   if (!address) return "";
@@ -42,39 +42,53 @@ export function ConnectButton() {
         <div className="relative">
           <button
             onClick={() => setIsDropdownOpen((open) => !open)}
-            className="flex items-center gap-2 bg-[#1C1D1F] text-white px-4 py-2 rounded-md hover:bg-[#2a2b2e] transition-colors"
+            className="flex items-center gap-3 bg-gradient-to-r from-[#232526] to-[#414345] text-white px-5 py-2 rounded-xl shadow-lg hover:from-[#2a2b2e] hover:to-[#232526] transition-all duration-200 focus:outline-none"
           >
-            <Image
-              src="/1.png"
-              alt="profile"
-              width={20}
-              height={23}
-              className="rounded-full"
-            />
-            {truncateAddress(address)}
-            <span
-              className={`border-white border-b-2 border-r-2 inline-block w-2 h-2 transform ${
-                isDropdownOpen ? "rotate-45 mb-1" : "-rotate-45"
+            <span className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6a82fb] to-[#fc5c7d] flex items-center justify-center shadow-md">
+              <Wallet size={20} strokeWidth={2.2} className="text-white" />
+            </span>
+            <span className="font-mono text-sm tracking-wide">
+              {truncateAddress(address)}
+            </span>
+            <svg
+              className={`w-4 h-4 ml-1 transition-transform duration-200 ${
+                isDropdownOpen ? "rotate-180" : ""
               }`}
-            />
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
           </button>
 
-          {isDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-48 bg-[#1C1D1F] rounded-md shadow-lg z-10">
-              <button
-                onClick={handleDisconnect}
-                className="w-full text-left px-4 py-2 hover:bg-[#2a2b2e] transition-colors"
-              >
-                Disconnect Wallet
-              </button>
-            </div>
-          )}
+          <div
+            className={`absolute right-0 mt-3 w-56 bg-[#232526] rounded-xl shadow-2xl border border-[#333] overflow-hidden z-20 transition-all duration-200 ${
+              isDropdownOpen
+                ? "opacity-100 translate-y-0 pointer-events-auto"
+                : "opacity-0 -translate-y-2 pointer-events-none"
+            }`}
+            style={{ minWidth: "180px" }}
+          >
+            <button
+              onClick={handleDisconnect}
+              className="w-full text-left px-5 py-3 text-white hover:bg-[#2a2b2e] transition-colors font-medium"
+            >
+              Disconnect Wallet
+            </button>
+          </div>
         </div>
       ) : (
         <button
           onClick={() => router.push("/auth")}
-          className="bg-white text-black px-4 py-2 rounded-md hover:bg-[#e5e6e7] transition-colors"
+          className="bg-gradient-to-r from-[#6a82fb] to-[#fc5c7d] text-white px-6 py-2 rounded-xl shadow-lg hover:from-[#fc5c7d] hover:to-[#6a82fb] transition-all duration-200 font-semibold flex items-center gap-2"
         >
+          <Wallet size={20} strokeWidth={2.2} className="text-white" />
           Connect Wallet
         </button>
       )}
