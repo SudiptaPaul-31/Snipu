@@ -19,8 +19,8 @@ const Header = () => {
         <Image
           src="/images/logo.jpg"
           alt="Snipu Logo"
-          width={100}
-          height={40}
+          width={190}
+          height={100}
           className="rounded-md"
           priority
         />
