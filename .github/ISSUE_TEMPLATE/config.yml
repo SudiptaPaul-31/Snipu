@@ -1,0 +1,17 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentation
+    url: https://github.com/SudiptaPaul-31/Snipu#readme
+    about: Please read the documentation before creating an issue.
+  - name: 💬 Telegram Community
+    url: https://t.me/snipu_code
+    about: Join our Telegram community for discussions and support.
+  - name: 🐛 Bug Report
+    url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=bug_report.md
+    about: Report a bug or unexpected behavior.
+  - name: ✨ Feature Request
+    url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=feature_request.md
+    about: Suggest a new feature or enhancement.
+  - name: 📝 General Issue
+    url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=general.md
+    about: Create a general issue for anything else. 

@@ -32,7 +32,13 @@ When applying to work on an issue:
      ```
    - Ensure there are no errors before submitting your PR.
 
-3. **PR Validation**
+3. **PR Template**
+   - Use the provided PR template when creating pull requests
+   - Fill out all relevant sections in the template
+   - Include screenshots/videos for UI changes
+   - Link related issues using `Closes #(issue_number)`
+
+4. **PR Validation**
    - If any checks fail on your PR, you must fix them before it can be merged.
    - The only exception is **Vercel deployments**, which require my authorization.
 
