@@ -46,6 +46,21 @@ assignees: ''
 ### Smart Contract Changes
 <!-- Describe any Cairo smart contract changes needed -->
 
+
+## ⛓️ Blockchain/Web3 Considerations
+
+### Wallet Integration
+<!-- Any wallet integration requirements -->
+
+### Network Support
+<!-- Which networks should this feature support -->
+
+### Gas Optimization
+<!-- Any gas optimization considerations -->
+
+### Security Implications
+<!-- Any security considerations for blockchain interactions -->
+
 ## 📊 Impact Assessment
 
 ### User Impact
@@ -60,6 +75,18 @@ assignees: ''
 ## 🧪 Testing Strategy
 
 <!-- How should this feature be tested? -->
+
+### Unit Testing
+<!-- Unit test requirements -->
+
+### Integration Testing
+<!-- Integration test requirements -->
+
+### Smart Contract Testing
+<!-- Smart contract test requirements -->
+
+### User Acceptance Testing
+<!-- UAT requirements -->
 
 ## 📚 Documentation Requirements
 
@@ -91,4 +118,6 @@ assignees: ''
 
 **Estimated Effort:** [Small/Medium/Large]
 
-**Target Release:** [Version or milestone] 
+**Target Release:** [Version or milestone]
+
+**Blockchain Impact:** [None/Low/Medium/High] 

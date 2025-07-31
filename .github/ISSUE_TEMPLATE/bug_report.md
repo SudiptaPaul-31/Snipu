@@ -72,6 +72,26 @@ assignees: ''
 ### Network Tab
 <!-- Any failed network requests -->
 
+## ⛓️ Blockchain/Web3 Specific Information
+
+### Wallet Connection
+- [ ] Ready (formely Argent X)
+- [ ] Braavos
+- [ ] Other: _______________
+- [ ] Not applicable
+
+### Network
+- [ ] Mainnet
+- [ ] Testnet (Sepolia)
+- [ ] Local development
+- [ ] Other: _______________
+
+### Smart Contract Interaction
+<!-- If the bug involves smart contract interaction, provide details -->
+
+### Transaction Details
+<!-- If the bug involves a failed transaction, provide transaction hash and details -->
+
 ## 🧪 Additional Context
 
 <!-- Add any other context about the problem here -->
@@ -90,4 +110,6 @@ assignees: ''
 
 **Estimated Impact:** [Number of users affected]
 
-**Reproducibility:** [Always/Sometimes/Rarely] 
+**Reproducibility:** [Always/Sometimes/Rarely]
+
+**Component Affected:** [Frontend/Backend/Smart Contract/Database/Other] 

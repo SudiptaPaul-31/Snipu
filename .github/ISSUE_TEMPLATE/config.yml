@@ -12,6 +12,15 @@ contact_links:
   - name: ✨ Feature Request
     url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=feature_request.md
     about: Suggest a new feature or enhancement.
+  - name: ⛓️ Smart Contract Issue
+    url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=smart_contract_issue.md
+    about: Report issues related to Cairo smart contracts or Bitcoin Script VM.
+  - name: 🔒 Security Issue
+    url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=security_issue.md
+    about: Report security vulnerabilities or privacy concerns.
+  - name: 📝 Documentation Issue
+    url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=documentation_issue.md
+    about: Report issues with documentation or help content.
   - name: 📝 General Issue
     url: https://github.com/SudiptaPaul-31/Snipu/issues/new?template=general.md
     about: Create a general issue for anything else. 
