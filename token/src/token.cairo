@@ -4,7 +4,7 @@
 #[starknet::contract]
 mod SnipuToken {
     use openzeppelin::access::ownable::OwnableComponent;
-    use openzeppelin::token::erc20::{ ERC20Component, ERC20HooksEmptyImpl};
+    use openzeppelin::token::erc20::{ERC20Component, ERC20HooksEmptyImpl};
     use starknet::ContractAddress;
 
     component!(path: ERC20Component, storage: erc20, event: ERC20Event);
