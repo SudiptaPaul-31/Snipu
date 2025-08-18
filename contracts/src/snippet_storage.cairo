@@ -1,14 +1,19 @@
 #[starknet::contract]
 pub mod SnippetStorage {
-    use core::starknet::storage::Map;
-    use crate::interfaces::isnippet_storage::ISnippetStorage;
-    use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
-    use starknet::{ContractAddress, contract_address_const, get_caller_address, get_block_timestamp};
     use core::array::ArrayTrait;
+    use core::starknet::storage::Map;
+    use starknet::storage::{
+        StorageMapReadAccess, StorageMapWriteAccess, StoragePathEntry, StoragePointerWriteAccess,
+    };
+    use starknet::{
+        ContractAddress, contract_address_const, get_block_timestamp, get_caller_address,
+    };
+    use crate::interfaces::isnippet_storage::ISnippetStorage;
 
     const ERR_NOT_AUTHORIZED: felt252 = 'Not authorized';
     const ERR_SNIPPET_NOT_FOUND: felt252 = 'Snippet not found';
     const ERR_SNIPPET_EXISTS: felt252 = 'Snippet ID already exists';
+    const ERR_INVALID_REACTION: felt252 = 'Invalid reaction';
 
     #[storage]
     struct Storage {
@@ -21,6 +26,10 @@ pub mod SnippetStorage {
         user_snippet_index: Map<(ContractAddress, felt252), u32>,
         comments: Map<felt252, (ContractAddress, felt252, felt252)>,
         snippet_ipfs_cid: Map<felt252, felt252>,
+        snippet_reactions: Map<
+            (felt252, ContractAddress), u8,
+        >, // <snippet_id, user_address> -> reaction type 1 - like, 2 - dislike
+        snippet_reactions_storage: Map<felt252, ReactionDetails> // <snippet_id> -> ReactionDetails
     }
 
     #[constructor]
@@ -30,12 +39,13 @@ pub mod SnippetStorage {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         SnippetStored: SnippetStored,
         SnippetAdded: SnippetAdded,
         SnippetRemoved: SnippetRemoved,
         SnippetUpdated: SnippetUpdated,
         CommentAdded: CommentAdded,
+        SnippetReacted: SnippetReacted,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -67,6 +77,20 @@ pub mod SnippetStorage {
         sender: ContractAddress,
         timestamp: felt252,
         content: felt252,
+    }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct SnippetReacted {
+        pub snippet_id: felt252,
+        pub sender: ContractAddress,
+        pub timestamp: u64,
+        pub reaction: u8,
+    }
+
+    #[derive(Drop, Serde, starknet::Store)]
+    pub struct ReactionDetails {
+        pub like: u256,
+        pub dislike: u256,
     }
 
     #[abi(embed_v0)]
@@ -129,15 +153,20 @@ pub mod SnippetStorage {
             let caller = get_caller_address();
             let timestamp: felt252 = get_block_timestamp().into(); // Convert u64 to felt252
             self.comments.write(snippet_id, (caller, timestamp, content));
-            self.emit(CommentAdded {
-                snippet_id: snippet_id,
-                sender: caller,
-                timestamp: timestamp,
-                content: content
-            });
+            self
+                .emit(
+                    CommentAdded {
+                        snippet_id: snippet_id,
+                        sender: caller,
+                        timestamp: timestamp,
+                        content: content,
+                    },
+                );
         }
 
-        fn get_comments(self: @ContractState, snippet_id: felt252) -> (ContractAddress, felt252, felt252) {
+        fn get_comments(
+            self: @ContractState, snippet_id: felt252,
+        ) -> (ContractAddress, felt252, felt252) {
             self.comments.read(snippet_id)
         }
 
@@ -152,7 +181,7 @@ pub mod SnippetStorage {
                 let snippet_id = self.user_snippet_ids.read((user, i));
                 snippets.append(snippet_id);
                 i += 1;
-            };
+            }
             snippets
         }
 
@@ -172,6 +201,41 @@ pub mod SnippetStorage {
             let caller = get_caller_address();
             let owner = self.snippet_owner.read(snippet_id);
             owner == caller
+        }
+
+        fn react_snippet(ref self: ContractState, snippet_id: felt252, reaction: u8) {
+            let caller = get_caller_address();
+            assert(reaction == 1 || reaction == 2, ERR_INVALID_REACTION);
+            assert(self.snippet_store.read(snippet_id) != 0, ERR_SNIPPET_NOT_FOUND);
+            let snippet_reaction = self.snippet_reactions.entry((snippet_id, caller));
+            snippet_reaction.write(reaction);
+            let mut reaction_details: ReactionDetails = self
+                .snippet_reactions_storage
+                .read(snippet_id);
+            if reaction == 1 {
+                reaction_details.like += 1;
+            } else {
+                reaction_details.dislike += 1;
+            }
+            self.snippet_reactions_storage.write(snippet_id, reaction_details);
+            self
+                .emit(
+                    SnippetReacted {
+                        snippet_id: snippet_id,
+                        sender: caller,
+                        timestamp: get_block_timestamp(),
+                        reaction: reaction,
+                    },
+                );
+        }
+
+        fn get_reaction_count(self: @ContractState, snippet_id: felt252) -> u256 {
+            let reaction_details: ReactionDetails = self.snippet_reactions_storage.read(snippet_id);
+            reaction_details.like + reaction_details.dislike
+        }
+
+        fn get_reactions(self: @ContractState, snippet_id: felt252) -> ReactionDetails {
+            self.snippet_reactions_storage.read(snippet_id)
         }
     }
 }
