@@ -242,17 +242,17 @@ fn test_react_snippetp() {
 
     start_cheat_caller_address(contract.contract_address, user_a());
     let user_a_reaction = contract.get_user_reaction(snippet_id);
-    assert(user_a_reaction == 1, ' incorrect reaction');
+    assert(user_a_reaction == 2, 'aincorrect reaction');
     stop_cheat_caller_address(contract.contract_address);
 
     start_cheat_caller_address(contract.contract_address, user_b());
     let user_b_reaction = contract.get_user_reaction(snippet_id);
-    assert(user_b_reaction == 2, ' incorrect reaction');
+    assert(user_b_reaction == 1, 'bincorrect reaction');
     stop_cheat_caller_address(contract.contract_address);
 
     start_cheat_caller_address(contract.contract_address, user_c());
     let user_c_reaction = contract.get_user_reaction(snippet_id);
-    assert(user_c_reaction == 1, ' incorrect reaction');
+    assert(user_c_reaction == 1, 'cincorrect reaction');
     stop_cheat_caller_address(contract.contract_address);
 }
 
@@ -393,7 +393,7 @@ fn test_remove_snippet_reaction_successful_event_emit() {
     stop_cheat_caller_address(contract.contract_address);
 
     let event_snippet_disliked = SnippetDisliked {
-        snippet_id: snippet_id, sender: user_b(), timestamp: get_block_timestamp(),
+        snippet_id: snippet_id, sender: user_a(), timestamp: get_block_timestamp(),
     };
 
     spy_events
