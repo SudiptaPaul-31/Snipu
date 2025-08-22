@@ -85,11 +85,11 @@ const SnippetDetailPage = () => {
           <div className="text-center py-20">
             <h1 className="text-3xl font-bold mb-4">Snippet Not Found</h1>
             <p className="text-gray-400 mb-6">
-              The snippet you're looking for doesn't exist.
+              The snippet you&apos;re looking for doesn&apos;t exist.
             </p>
             <Link href="/snippet">
-              <button className="bg-gradient-to-r from-teal-400 to-blue-500 text-black font-semibold px-6 py-2 rounded-full">
-                Back to Snippets
+              <button className="inline-flex items-center text-blue-400 hover:text-blue-300 transition-colors bg-gradient-to-r from-teal-400 to-blue-500 font-semibold">
+                ← Back to Snippets
               </button>
             </Link>
           </div>

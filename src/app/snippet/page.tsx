@@ -9,7 +9,7 @@ import { useEffect, useMemo, useState } from "react";
 import Footer from "@/components/Footer";
 import { SearchAndFilterSection } from "@/components/SearchAndFilterSection";
 import { motion } from "framer-motion";
-import { Code2, Plus, Sparkles } from "lucide-react";
+import { ArrowLeft, Code2, Plus, Sparkles } from "lucide-react";
 import { mockSnippets } from "@/lib/mockData";
 
 export default function Home() {
@@ -78,6 +78,20 @@ export default function Home() {
       <Header />
 
       <main className="container mx-auto px-4 py-8">
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-gray-400 hover:text-teal-400 transition-colors group"
+          >
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back Home
+          </Link>
+        </motion.div>
         {/* Hero Section */}
         <motion.div
           className="text-center mb-16"
