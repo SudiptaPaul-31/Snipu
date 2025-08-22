@@ -47,7 +47,7 @@ pub mod SnippetStorage {
         SnippetUpdated: SnippetUpdated,
         CommentAdded: CommentAdded,
         SnippetReacted: SnippetReacted,
-        SnippetDisliked: SnippetDisliked
+        SnippetDisliked: SnippetDisliked,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -93,7 +93,8 @@ pub mod SnippetStorage {
     pub struct SnippetDisliked {
         pub snippet_id: felt252,
         pub sender: ContractAddress,
-        pub timestamp: u64    }
+        pub timestamp: u64,
+    }
 
     #[derive(Drop, Serde, starknet::Store)]
     pub struct ReactionDetails {
@@ -308,9 +309,7 @@ pub mod SnippetStorage {
             self
                 .emit(
                     SnippetDisliked {
-                        snippet_id: snippet_id,
-                        sender: caller,
-                        timestamp: get_block_timestamp(),
+                        snippet_id: snippet_id, sender: caller, timestamp: get_block_timestamp(),
                     },
                 );
         }
