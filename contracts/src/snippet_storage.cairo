@@ -3,7 +3,8 @@ pub mod SnippetStorage {
     use core::array::ArrayTrait;
     use core::starknet::storage::Map;
     use starknet::storage::{
-        StorageMapReadAccess, StorageMapWriteAccess, StoragePathEntry, StoragePointerWriteAccess,
+        StorageMapReadAccess, StorageMapWriteAccess, StoragePathEntry, StoragePointerReadAccess,
+        StoragePointerWriteAccess,
     };
     use starknet::{
         ContractAddress, contract_address_const, get_block_timestamp, get_caller_address,
@@ -46,6 +47,7 @@ pub mod SnippetStorage {
         SnippetUpdated: SnippetUpdated,
         CommentAdded: CommentAdded,
         SnippetReacted: SnippetReacted,
+        SnippetDisliked: SnippetDisliked
     }
 
     #[derive(Drop, starknet::Event)]
@@ -86,6 +88,12 @@ pub mod SnippetStorage {
         pub timestamp: u64,
         pub reaction: u8,
     }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct SnippetDisliked {
+        pub snippet_id: felt252,
+        pub sender: ContractAddress,
+        pub timestamp: u64    }
 
     #[derive(Drop, Serde, starknet::Store)]
     pub struct ReactionDetails {
@@ -203,21 +211,48 @@ pub mod SnippetStorage {
             owner == caller
         }
 
-        fn react_snippet(ref self: ContractState, snippet_id: felt252, reaction: u8) {
+        fn react_snippet(ref self: ContractState, snippet_id: felt252) {
             let caller = get_caller_address();
-            assert(reaction == 1 || reaction == 2, ERR_INVALID_REACTION);
+
+            let user_current_reaction = self.get_user_reaction(snippet_id);
+
+            let like = 1;
+
+            let dislike = 2;
+
             assert(self.snippet_store.read(snippet_id) != 0, ERR_SNIPPET_NOT_FOUND);
+
             let snippet_reaction = self.snippet_reactions.entry((snippet_id, caller));
-            snippet_reaction.write(reaction);
+
             let mut reaction_details: ReactionDetails = self
                 .snippet_reactions_storage
                 .read(snippet_id);
-            if reaction == 1 {
-                reaction_details.like += 1;
-            } else {
-                reaction_details.dislike += 1;
+
+            let mut reaction = 0;
+
+            match user_current_reaction {
+                // new reaction
+                0 => {
+                    reaction_details.like += 1;
+                    reaction = like;
+                },
+                // liked and wants to dislike
+                1 => {
+                    reaction_details.like -= 1;
+                    reaction_details.dislike += 1;
+                    reaction = dislike;
+                },
+                // dislike and wants to like
+                2 => {
+                    reaction_details.like += 1;
+                    reaction_details.dislike -= 1;
+                    reaction = like;
+                },
+                _ => {},
             }
             self.snippet_reactions_storage.write(snippet_id, reaction_details);
+            snippet_reaction.write(reaction);
+
             self
                 .emit(
                     SnippetReacted {
@@ -236,6 +271,48 @@ pub mod SnippetStorage {
 
         fn get_reactions(self: @ContractState, snippet_id: felt252) -> ReactionDetails {
             self.snippet_reactions_storage.read(snippet_id)
+        }
+
+        fn get_user_reaction(self: @ContractState, snippet_id: felt252) -> u8 {
+            let caller = get_caller_address();
+            self.snippet_reactions.entry((snippet_id, caller)).read()
+        }
+
+        fn remove_snippet_reaction(ref self: ContractState, snippet_id: felt252) {
+            let caller = get_caller_address();
+
+            let user_current_reaction = self.get_user_reaction(snippet_id);
+
+            assert(self.snippet_store.read(snippet_id) != 0, ERR_SNIPPET_NOT_FOUND);
+
+            let snippet_reaction = self.snippet_reactions.entry((snippet_id, caller));
+
+            let mut reaction_details: ReactionDetails = self
+                .snippet_reactions_storage
+                .read(snippet_id);
+
+            let mut reaction = 0;
+
+            match user_current_reaction {
+                // new reaction
+                0 => {},
+                // likes and wants to remove like
+                1 => { reaction_details.like -= 1; },
+                // dislike and wants to remove dislike
+                2 => { reaction_details.dislike -= 1; },
+                _ => {},
+            }
+            self.snippet_reactions_storage.write(snippet_id, reaction_details);
+            snippet_reaction.write(reaction);
+
+            self
+                .emit(
+                    SnippetDisliked {
+                        snippet_id: snippet_id,
+                        sender: caller,
+                        timestamp: get_block_timestamp(),
+                    },
+                );
         }
     }
 }
