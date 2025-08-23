@@ -1,10 +1,12 @@
 #[starknet::contract]
 pub mod SnippetStorage {
+    use core::array::ArrayTrait;
     use core::starknet::storage::Map;
     use crate::interfaces::isnippet_storage::ISnippetStorage;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
-    use starknet::{ContractAddress, contract_address_const, get_caller_address, get_block_timestamp};
-    use core::array::ArrayTrait;
+    use starknet::{
+        ContractAddress, contract_address_const, get_block_timestamp, get_caller_address,
+    };
 
     const ERR_NOT_AUTHORIZED: felt252 = 'Not authorized';
     const ERR_SNIPPET_NOT_FOUND: felt252 = 'Snippet not found';
@@ -132,17 +134,27 @@ pub mod SnippetStorage {
             let count = self.comments_count.read(snippet_id);
             self.comments.write((snippet_id, count), (caller, timestamp, content));
             self.comments_count.write(snippet_id, count);
-            self.emit(CommentAdded {
-                snippet_id: snippet_id,
-                sender: caller,
-                timestamp: timestamp,
-                content: content
-            });
+            self
+                .emit(
+                    CommentAdded {
+                        snippet_id: snippet_id,
+                        sender: caller,
+                        timestamp: timestamp,
+                        content: content,
+                    },
+                );
         }
 
-        fn get_comments(self: @ContractState, snippet_id: felt252) -> Array<(ContractAddress, felt252, felt252)> {
+        fn get_comments(
+            self: @ContractState, snippet_id: felt252,
+        ) -> Array<(ContractAddress, felt252, felt252)> {
             let mut comments = array![];
-            self.comments.read(snippet_id)
+            let count = self.comments_count.read(snippet_id);
+            for i in 0..count {
+                let comment = self.comments.read((snippet_id, i + 1));
+                comments.append(comment);
+            };
+            comments
         }
 
         fn get_user_snippets(self: @ContractState, user: ContractAddress) -> Array<felt252> {
