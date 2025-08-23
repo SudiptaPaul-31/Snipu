@@ -3,6 +3,7 @@
 import OurStory from "@/components/OurStory";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import OurValues from "@/components/OurValues";
 
 export default function About() {
   return (
@@ -11,7 +12,10 @@ export default function About() {
       <Header />
       <main className="text-white container mx-auto px-4">
         {/* About Section */}
+        {/* Out Story */}
         <OurStory/>
+        {/* Out Values */}
+        <OurValues/>
       </main>
 
       {/* Footer */}
