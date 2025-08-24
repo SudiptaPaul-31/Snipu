@@ -4,6 +4,7 @@ import OurStory from "@/components/OurStory";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import HeroSection from "./HeroSection";
+import OurValues from "@/components/OurValues";
 
 export default function About() {
   return (
@@ -15,6 +16,8 @@ export default function About() {
         <HeroSection />
         {/* About Section */}
         <OurStory/>
+        {/* Our Values */}
+        <OurValues/>
       </main>
 
       {/* Footer */}
@@ -22,4 +25,6 @@ export default function About() {
     </div>
   );
 }
+
+
 
