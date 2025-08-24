@@ -1,12 +1,14 @@
+use core::array::ArrayTrait;
 use snforge_std::{
-    ContractClassTrait, DeclareResultTrait, declare, start_cheat_caller_address,
+    CheatSpan, ContractClassTrait, DeclareResultTrait, EventSpyAssertionsTrait,
+    cheat_block_timestamp, declare, spy_events, start_cheat_caller_address,
     stop_cheat_caller_address,
 };
 use snippet_storage::interfaces::isnippet_storage::{
     ISnippetStorageDispatcher, ISnippetStorageDispatcherTrait,
 };
+use snippet_storage::snippet_storage::SnippetStorage;
 use starknet::{ContractAddress, contract_address_const};
-use core::array::ArrayTrait;
 
 // Helper to initialize contract with default owner
 fn init_contract() -> ISnippetStorageDispatcher {
@@ -27,13 +29,15 @@ fn user_b() -> ContractAddress {
 //Helper function to check if an array contains a value
 fn array_contains<T, +Drop<T>, +PartialEq<T>, +Copy<T>>(arr: @Array<T>, value: T) -> bool {
     let mut i = 0;
+    let mut found = false;
     while i < arr.len() {
         if *arr.at(i) == value {
-            return true;
+            found = true;
+            break;
         }
         i += 1;
     };
-    false
+    found
 }
 
 #[test]
@@ -45,7 +49,7 @@ fn test_constructor_rejects_zero_address() {
         Result::Ok(_) => assert(false, 'Deployment should have failed'),
         Result::Err(panic_data) => {
             assert(*panic_data.at(0) == 'Owner cannot be zero', 'Incorrect panic data');
-        }
+        },
     }
 }
 
@@ -189,4 +193,50 @@ fn test_is_snippet_owner_negative() {
     let is_owner = contract.is_snippet_owner(snippet_id);
     assert(is_owner == false, 'Should not be the owner');
     stop_cheat_caller_address(contract.contract_address);
+}
+
+#[test]
+fn test_snippet_add_and_get_comment_success() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_snippet(snippet_id, content);
+    stop_cheat_caller_address(contract.contract_address);
+
+    let comments = contract.get_comments(snippet_id);
+    assert(comments.len() == 0, 'LEN SHOULD BE ZERO.');
+    let mut spy = spy_events();
+    let mut events = array![];
+
+    for i in 0..3_u32 {
+        let comment: felt252 = i.into() + 1;
+        // feign different callers
+        let caller: ContractAddress = comment.try_into().unwrap();
+        start_cheat_caller_address(contract.contract_address, caller);
+        cheat_block_timestamp(contract.contract_address, i.into(), CheatSpan::TargetCalls(1));
+        contract.add_comment(snippet_id, comment);
+        let event = SnippetStorage::Event::CommentAdded(
+            SnippetStorage::CommentAdded {
+                snippet_id, sender: caller, timestamp: i.into(), content: comment,
+            },
+        );
+        stop_cheat_caller_address(contract.contract_address);
+        events.append((contract.contract_address, event));
+    };
+
+    let comments = contract.get_comments(snippet_id);
+    println!("Comments len is: {}", comments.len());
+    assert(comments.len() == 3, 'LEN SHOULD BE 3');
+    spy.assert_emitted(@events);
+}
+
+#[test]
+#[should_panic(expected: 'Snippet not found')]
+fn test_snippet_add_comment_should_panic_on_invalid_snippet_id() {
+    let contract = init_contract();
+    let snippet_id = 42;
+
+    contract.add_comment(snippet_id, 'comment');
 }

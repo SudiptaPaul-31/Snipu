@@ -1,10 +1,12 @@
 #[starknet::contract]
 pub mod SnippetStorage {
+    use core::array::ArrayTrait;
     use core::starknet::storage::Map;
     use crate::interfaces::isnippet_storage::ISnippetStorage;
     use starknet::storage::{StorageMapReadAccess, StorageMapWriteAccess};
-    use starknet::{ContractAddress, contract_address_const, get_caller_address, get_block_timestamp};
-    use core::array::ArrayTrait;
+    use starknet::{
+        ContractAddress, contract_address_const, get_block_timestamp, get_caller_address,
+    };
 
     const ERR_NOT_AUTHORIZED: felt252 = 'Not authorized';
     const ERR_SNIPPET_NOT_FOUND: felt252 = 'Snippet not found';
@@ -19,8 +21,9 @@ pub mod SnippetStorage {
         user_snippet_count: Map<ContractAddress, u32>,
         user_snippet_ids: Map<(ContractAddress, u32), felt252>,
         user_snippet_index: Map<(ContractAddress, felt252), u32>,
-        comments: Map<felt252, (ContractAddress, felt252, felt252)>,
+        comments: Map<(felt252, u32), (ContractAddress, felt252, felt252)>,
         snippet_ipfs_cid: Map<felt252, felt252>,
+        comments_count: Map<felt252, u32>,
     }
 
     #[constructor]
@@ -30,7 +33,7 @@ pub mod SnippetStorage {
 
     #[event]
     #[derive(Drop, starknet::Event)]
-    enum Event {
+    pub enum Event {
         SnippetStored: SnippetStored,
         SnippetAdded: SnippetAdded,
         SnippetRemoved: SnippetRemoved,
@@ -62,11 +65,11 @@ pub mod SnippetStorage {
     }
 
     #[derive(Drop, starknet::Event)]
-    struct CommentAdded {
-        snippet_id: felt252,
-        sender: ContractAddress,
-        timestamp: felt252,
-        content: felt252,
+    pub struct CommentAdded {
+        pub snippet_id: felt252,
+        pub sender: ContractAddress,
+        pub timestamp: felt252,
+        pub content: felt252,
     }
 
     #[abi(embed_v0)]
@@ -128,17 +131,31 @@ pub mod SnippetStorage {
         fn add_comment(ref self: ContractState, snippet_id: felt252, content: felt252) {
             let caller = get_caller_address();
             let timestamp: felt252 = get_block_timestamp().into(); // Convert u64 to felt252
-            self.comments.write(snippet_id, (caller, timestamp, content));
-            self.emit(CommentAdded {
-                snippet_id: snippet_id,
-                sender: caller,
-                timestamp: timestamp,
-                content: content
-            });
+            assert(self.snippet_store.read(snippet_id) != 0, ERR_SNIPPET_NOT_FOUND);
+            let count = self.comments_count.read(snippet_id) + 1;
+            self.comments.write((snippet_id, count), (caller, timestamp, content));
+            self.comments_count.write(snippet_id, count);
+            self
+                .emit(
+                    CommentAdded {
+                        snippet_id: snippet_id,
+                        sender: caller,
+                        timestamp: timestamp,
+                        content: content,
+                    },
+                );
         }
 
-        fn get_comments(self: @ContractState, snippet_id: felt252) -> (ContractAddress, felt252, felt252) {
-            self.comments.read(snippet_id)
+        fn get_comments(
+            self: @ContractState, snippet_id: felt252,
+        ) -> Array<(ContractAddress, felt252, felt252)> {
+            let mut comments = array![];
+            let count = self.comments_count.read(snippet_id);
+            for i in 0..count {
+                let comment = self.comments.read((snippet_id, i + 1));
+                comments.append(comment);
+            };
+            comments
         }
 
         fn get_user_snippets(self: @ContractState, user: ContractAddress) -> Array<felt252> {
