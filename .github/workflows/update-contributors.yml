@@ -1,35 +1,85 @@
-name: Update Contributors in README
+name: Update Contributors (PR)
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 0 * * 0" # Run weekly on Sundays at midnight
-  workflow_dispatch: # Allow manual triggering
-  push:
-    branches: [main] # Or run on pushes to main if desired
+permissions:
+  contents: write       # needed to push a branch / create commits
+  pull-requests: write  # needed to open/update a PR
+
+concurrency:
+  group: update-contributors
+  cancel-in-progress: false
 
 jobs:
   update-contributors:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 
-      - name: Install dependencies
+      - name: Install deps
         run: pip install requests
 
-      - name: Update Contributors
-        run: python .github/scripts/update_contributors.py
+      - name: Run updater
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Commit and push if changed
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}      # auto-provided
+          GITHUB_REPOSITORY: ${{ github.repository }}     # owner/repo
+          README_PATH: README.md
+          MAX_CONTRIBUTORS: "20"
+          EXCLUDE_BOTS: "true"
+          PER_ROW: "6"
         run: |
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
-          git add README.md
-          git diff --staged --quiet || git commit -m "Update contributors"
-          git push
+          python scripts/update_contributors.py
+
+      - name: Commit changes
+        run: |
+          set -e
+          if ! git diff --quiet; then
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git config user.name "github-actions[bot]"
+            git checkout -B chore/update-contributors
+            git add README.md
+            git commit -m "chore(readme): update contributors table (automated)"
+          else
+            echo "No changes to commit."
+          fi
+
+      - name: Create/Update PR
+        if: always()
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore(readme): update contributors table (automated)"
+          branch: chore/update-contributors
+          title: "chore(readme): update contributors table"
+          body: |
+            This PR was created automatically to refresh the **Contributors** section in `README.md`.
+
+            - Source: GitHub API `/contributors` (users only, bots excluded)
+            - Limit: 20 contributors (configurable)
+            - Layout: 6 avatars per row
+            - Safe edit: only the content between markers is touched:
+              ```
+              <!-- CONTRIBUTORS-START -->
+              ...generated table...
+              <!-- CONTRIBUTORS-END -->
+              ```
+
+            If this looks good, please merge. No code changes.
+          labels: |
+            chore
+            automation
+          author: github-actions[bot] <github-actions[bot]@users.noreply.github.com>
+          signoff: false
+          draft: false
