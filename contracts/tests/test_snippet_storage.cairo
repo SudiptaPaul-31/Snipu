@@ -7,8 +7,10 @@ use snforge_std::{
 use snippet_storage::interfaces::isnippet_storage::{
     ISnippetStorageDispatcher, ISnippetStorageDispatcherTrait,
 };
+use snippet_storage::snippet_storage::SnippetStorage::{Event, SnippetDisliked, SnippetReacted};
+use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
 use snippet_storage::snippet_storage::SnippetStorage;
-use starknet::{ContractAddress, contract_address_const};
+
 
 // Helper to initialize contract with default owner
 fn init_contract() -> ISnippetStorageDispatcher {
@@ -24,6 +26,9 @@ fn user_a() -> ContractAddress {
 }
 fn user_b() -> ContractAddress {
     contract_address_const::<54321>()
+}
+fn user_c() -> ContractAddress {
+    contract_address_const::<999999>()
 }
 
 //Helper function to check if an array contains a value
@@ -135,7 +140,7 @@ fn test_get_user_snippets() {
         let id = *snippets.at(i);
         assert(array_contains(@expected_ids, id), 'Unexpected snippet ID');
         i += 1;
-    };
+    }
     stop_cheat_caller_address(contract.contract_address);
 }
 
@@ -195,8 +200,9 @@ fn test_is_snippet_owner_negative() {
     stop_cheat_caller_address(contract.contract_address);
 }
 
+
 #[test]
-fn test_snippet_add_and_get_comment_success() {
+fn test_react_snippetp() {
     let contract = init_contract();
     let snippet_id = 42;
     let content = 123;
@@ -204,6 +210,148 @@ fn test_snippet_add_and_get_comment_success() {
     start_cheat_caller_address(contract.contract_address, user_a());
     contract.add_snippet(snippet_id, content);
     stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    let reaction_count = contract.get_reaction_count(snippet_id);
+    assert(reaction_count == 1, 'aReaction count should be 1');
+
+    let reactions = contract.get_reactions(snippet_id);
+    assert(reactions.like == 1, 'bReaction count should be 1');
+    assert(reactions.dislike == 0, 'cReaction count should be 0');
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.react_snippet(snippet_id);
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    let reaction_count = contract.get_reaction_count(snippet_id);
+    assert(reaction_count == 2, 'fReaction count should be 2');
+
+    let reactions = contract.get_reactions(snippet_id);
+    assert(reactions.like == 1, 'dReaction count should be 1');
+    assert(reactions.dislike == 1, 'eReaction count should be 1');
+
+    start_cheat_caller_address(contract.contract_address, user_c());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    let reaction_count = contract.get_reaction_count(snippet_id);
+    assert(reaction_count == 3, 'fReaction count should be 2');
+
+    let reactions = contract.get_reactions(snippet_id);
+    assert(reactions.like == 2, 'dReaction count should be 1');
+    assert(reactions.dislike == 1, 'eReaction count should be 1');
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    let user_a_reaction = contract.get_user_reaction(snippet_id);
+    assert(user_a_reaction == 2, 'aincorrect reaction');
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    let user_b_reaction = contract.get_user_reaction(snippet_id);
+    assert(user_b_reaction == 1, 'bincorrect reaction');
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_c());
+    let user_c_reaction = contract.get_user_reaction(snippet_id);
+    assert(user_c_reaction == 1, 'cincorrect reaction');
+    stop_cheat_caller_address(contract.contract_address);
+}
+
+#[test]
+#[should_panic(expected: 'Snippet not found')]
+fn test_react_snippet_should_panic_if_snippet_not_found() {
+    let contract = init_contract();
+    let snippet_id = 42;
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+}
+
+
+#[test]
+fn test_react_snippet_event_emmitted() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    let mut spy_events = spy_events();
+
+    // Store a snippet as user_a
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_snippet(snippet_id, content);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_block_timestamp(contract.contract_address, get_block_timestamp());
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    let event_snippet_reacted = SnippetReacted {
+        snippet_id: snippet_id, sender: user_b(), timestamp: get_block_timestamp(), reaction: 1,
+    };
+
+    spy_events
+        .assert_emitted(
+            @array![(contract.contract_address, Event::SnippetReacted(event_snippet_reacted))],
+        )
+}
+
+#[test]
+fn test_remove_snippet_reaction() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.add_snippet(snippet_id, content);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_c());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    let user_a_reaction = contract.get_user_reaction(snippet_id);
+    assert(user_a_reaction == 1, ' incorrect reaction');
+    stop_cheat_caller_address(contract.contract_address);
+
+    let reaction_count = contract.get_reaction_count(snippet_id);
+    assert(reaction_count == 2, 'aReaction count should be 1');
+
+    let reactions = contract.get_reactions(snippet_id);
+    assert(reactions.like == 2, 'bReaction count should be 1');
+    assert(reactions.dislike == 0, 'cReaction count should be 0');
+
+    // remove reaction
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.remove_snippet_reaction(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    let user_a_reaction = contract.get_user_reaction(snippet_id);
+    assert(user_a_reaction == 0, ' incorrect reaction');
+    stop_cheat_caller_address(contract.contract_address);
+
+    let reaction_count = contract.get_reaction_count(snippet_id);
+    assert(reaction_count == 1, 'aReaction count should be 1');
+
+    let reactions = contract.get_reactions(snippet_id);
+    assert(reactions.like == 1, 'bReaction count should be 1');
+    assert(reactions.dislike == 0, 'cReaction count should be 0');
+
+}
+
+#[test]
+fn test_snippet_add_and_get_comment_success() {
 
     let comments = contract.get_comments(snippet_id);
     assert(comments.len() == 0, 'LEN SHOULD BE ZERO.');
@@ -234,6 +382,62 @@ fn test_snippet_add_and_get_comment_success() {
 
 #[test]
 #[should_panic(expected: 'Snippet not found')]
+fn test_remove_snippet_reaction_should_panic_if_snippet_not_found() {
+    let contract = init_contract();
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.remove_snippet_reaction(1);
+    stop_cheat_caller_address(contract.contract_address);
+}
+
+
+#[test]
+fn test_remove_snippet_reaction_successful_event_emit() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    let mut spy_events = spy_events();
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.add_snippet(snippet_id, content);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_c());
+    contract.react_snippet(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    let user_a_reaction = contract.get_user_reaction(snippet_id);
+    assert(user_a_reaction == 1, ' incorrect reaction');
+    stop_cheat_caller_address(contract.contract_address);
+
+    let reaction_count = contract.get_reaction_count(snippet_id);
+    assert(reaction_count == 2, 'aReaction count should be 1');
+
+    let reactions = contract.get_reactions(snippet_id);
+    assert(reactions.like == 2, 'bReaction count should be 1');
+    assert(reactions.dislike == 0, 'cReaction count should be 0');
+
+    // remove reaction
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.remove_snippet_reaction(snippet_id);
+    stop_cheat_caller_address(contract.contract_address);
+
+    let event_snippet_disliked = SnippetDisliked {
+        snippet_id: snippet_id, sender: user_a(), timestamp: get_block_timestamp(),
+    };
+
+    spy_events
+        .assert_emitted(
+            @array![(contract.contract_address, Event::SnippetDisliked(event_snippet_disliked))],
+        )
+}
+
 fn test_snippet_add_comment_should_panic_on_invalid_snippet_id() {
     let contract = init_contract();
     let snippet_id = 42;
