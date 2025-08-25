@@ -3,6 +3,7 @@
 import OurStory from "@/components/OurStory";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import HeroSection from "./HeroSection";
 import OurValues from "@/components/OurValues";
 
 export default function About() {
@@ -11,10 +12,11 @@ export default function About() {
       {/* Header */}
       <Header />
       <main className="text-white container mx-auto px-4">
+        {/* Hero Section */}
+        <HeroSection />
         {/* About Section */}
-        {/* Out Story */}
         <OurStory/>
-        {/* Out Values */}
+        {/* Our Values */}
         <OurValues/>
       </main>
 
@@ -23,4 +25,6 @@ export default function About() {
     </div>
   );
 }
+
+
 
