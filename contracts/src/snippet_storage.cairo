@@ -34,12 +34,22 @@ pub mod SnippetStorage {
         >, // <snippet_id, user_address> -> reaction type 1 - like, 2 - dislike
         snippet_reactions_storage: Map<felt252, ReactionDetails>, // <snippet_id> -> ReactionDetails
         comments_count: Map<felt252, u32>,
+        version_count: Map<felt252, u32>,
+        versions: Map<(felt252, u32), felt252>,
     }
 
     #[constructor]
     fn constructor(ref self: ContractState, owner: ContractAddress) {
         assert(owner != contract_address_const::<0>(), 'Owner cannot be zero');
     }
+
+    #[derive(Drop, starknet::Event)]
+    pub struct SnippetVersionAdded {
+    snippet_id: felt252,
+    snippet_hash: felt252,
+    timestamp: u64,
+    }
+
 
     #[event]
     #[derive(Drop, starknet::Event)]
@@ -51,6 +61,7 @@ pub mod SnippetStorage {
         CommentAdded: CommentAdded,
         SnippetReacted: SnippetReacted,
         SnippetDisliked: SnippetDisliked,
+        SnippetVersionAdded: SnippetVersionAdded,
     }
 
     #[derive(Drop, starknet::Event)]
@@ -324,6 +335,35 @@ pub mod SnippetStorage {
                         snippet_id: snippet_id, sender: caller, timestamp: get_block_timestamp(),
                     },
                 );
+        }
+        fn add_version(ref self: ContractState, snippet_id: felt252, snippet_hash: felt252) {
+            let caller = get_caller_address();
+            let owner = self.snippet_owner.read(snippet_id);
+            assert(owner == caller, ERR_NOT_AUTHORIZED);
+            assert(self.snippet_store.read(snippet_id) != 0, ERR_SNIPPET_NOT_FOUND);
+
+            let count = self.version_count.read(snippet_id);
+            self.versions.write((snippet_id, count), snippet_hash);
+            self.version_count.write(snippet_id, count + 1);
+
+            self.emit(SnippetVersionAdded {
+                snippet_id,
+                snippet_hash,
+                timestamp: get_block_timestamp(),
+            });
+        }
+        fn get_versions(self: @ContractState, snippet_id: felt252) -> Array<felt252> {
+            let count = self.version_count.read(snippet_id);
+            let mut versions = ArrayTrait::new();
+            let mut i = 0;
+            loop {
+                if i >= count {
+                    break versions;
+                }
+                let version_hash = self.versions.read((snippet_id, i));
+                versions.append(version_hash);
+                i += 1;
+            }
         }
     }
 }
