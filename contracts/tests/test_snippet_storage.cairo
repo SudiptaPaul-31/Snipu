@@ -444,3 +444,50 @@ fn test_snippet_add_comment_should_panic_on_invalid_snippet_id() {
 
     contract.add_comment(snippet_id, 'comment');
 }
+
+#[test]
+fn test_add_and_get_versions() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_snippet(snippet_id, content);
+    
+    // Add versions
+    contract.add_version(snippet_id, 456);
+    contract.add_version(snippet_id, 789);
+    
+    let versions = contract.get_versions(snippet_id);
+    assert(versions.len() == 2, 'Should have 2 versions');
+    assert(*versions.at(0) == 456, 'First version mismatch');
+    assert(*versions.at(1) == 789, 'Second version mismatch');
+    stop_cheat_caller_address(contract.contract_address);
+}
+
+#[test]
+#[should_panic(expected: 'Not authorized')]
+fn test_add_version_unauthorized() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_snippet(snippet_id, content);
+    stop_cheat_caller_address(contract.contract_address);
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.add_version(snippet_id, 456); // Should panic
+    stop_cheat_caller_address(contract.contract_address);
+}
+
+#[test]
+#[should_panic(expected: 'Snippet not found')]
+fn test_add_version_nonexistent_snippet() {
+    let contract = init_contract();
+    let snippet_id = 42;
+
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_version(snippet_id, 456); // Should panic
+    stop_cheat_caller_address(contract.contract_address);
+}

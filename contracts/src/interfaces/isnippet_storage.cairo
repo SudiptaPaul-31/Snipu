@@ -24,4 +24,6 @@ pub trait ISnippetStorage<TContractState> {
     fn get_reaction_count(self: @TContractState, snippet_id: felt252) -> u256;
     fn get_reactions(self: @TContractState, snippet_id: felt252) -> ReactionDetails;
     fn get_user_reaction(self: @TContractState, snippet_id: felt252) -> u8;
+    fn add_version(ref self: TContractState, snippet_id: felt252, snippet_hash: felt252);
+    fn get_versions(self: @TContractState, snippet_id: felt252) -> Array<felt252>;
 }
