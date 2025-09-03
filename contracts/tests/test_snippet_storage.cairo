@@ -1,15 +1,15 @@
 use core::array::ArrayTrait;
 use snforge_std::{
     CheatSpan, ContractClassTrait, DeclareResultTrait, EventSpyAssertionsTrait,
-    cheat_block_timestamp, declare, spy_events, start_cheat_caller_address,
-    stop_cheat_caller_address,
+    cheat_block_timestamp, declare, spy_events, start_cheat_block_timestamp,
+    start_cheat_caller_address, stop_cheat_caller_address,
 };
 use snippet_storage::interfaces::isnippet_storage::{
     ISnippetStorageDispatcher, ISnippetStorageDispatcherTrait,
 };
+use snippet_storage::snippet_storage::SnippetStorage;
 use snippet_storage::snippet_storage::SnippetStorage::{Event, SnippetDisliked, SnippetReacted};
 use starknet::{ContractAddress, contract_address_const, get_block_timestamp};
-use snippet_storage::snippet_storage::SnippetStorage;
 
 
 // Helper to initialize contract with default owner
@@ -31,6 +31,7 @@ fn user_c() -> ContractAddress {
     contract_address_const::<999999>()
 }
 
+
 //Helper function to check if an array contains a value
 fn array_contains<T, +Drop<T>, +PartialEq<T>, +Copy<T>>(arr: @Array<T>, value: T) -> bool {
     let mut i = 0;
@@ -41,7 +42,7 @@ fn array_contains<T, +Drop<T>, +PartialEq<T>, +Copy<T>>(arr: @Array<T>, value: T
             break;
         }
         i += 1;
-    };
+    }
     found
 }
 
@@ -347,11 +348,17 @@ fn test_remove_snippet_reaction() {
     let reactions = contract.get_reactions(snippet_id);
     assert(reactions.like == 1, 'bReaction count should be 1');
     assert(reactions.dislike == 0, 'cReaction count should be 0');
-
 }
 
 #[test]
 fn test_snippet_add_and_get_comment_success() {
+    let contract = init_contract();
+    let snippet_id = 42;
+    let content = 123;
+
+    start_cheat_caller_address(contract.contract_address, user_b());
+    contract.add_snippet(snippet_id, content);
+    stop_cheat_caller_address(contract.contract_address);
 
     let comments = contract.get_comments(snippet_id);
     assert(comments.len() == 0, 'LEN SHOULD BE ZERO.');
@@ -372,7 +379,7 @@ fn test_snippet_add_and_get_comment_success() {
         );
         stop_cheat_caller_address(contract.contract_address);
         events.append((contract.contract_address, event));
-    };
+    }
 
     let comments = contract.get_comments(snippet_id);
     println!("Comments len is: {}", comments.len());
@@ -453,11 +460,11 @@ fn test_add_and_get_versions() {
 
     start_cheat_caller_address(contract.contract_address, user_a());
     contract.add_snippet(snippet_id, content);
-    
+
     // Add versions
     contract.add_version(snippet_id, 456);
     contract.add_version(snippet_id, 789);
-    
+
     let versions = contract.get_versions(snippet_id);
     assert(versions.len() == 2, 'Should have 2 versions');
     assert(*versions.at(0) == 456, 'First version mismatch');
@@ -486,8 +493,157 @@ fn test_add_version_unauthorized() {
 fn test_add_version_nonexistent_snippet() {
     let contract = init_contract();
     let snippet_id = 42;
+    let content = 123;
 
     start_cheat_caller_address(contract.contract_address, user_a());
     contract.add_version(snippet_id, 456); // Should panic
     stop_cheat_caller_address(contract.contract_address);
+}
+
+#[test]
+fn test_get_trending_snippets_success() {
+    let contract = init_contract();
+    let snippet_id_1 = 42;
+    let snippet_id_2 = 43;
+    let snippet_id_3 = 44;
+    let snippet_id_4 = 45;
+
+    let content_1 = 123;
+    let content_2 = 456;
+    let content_3 = 789;
+    let content_4 = 101112;
+
+    // add 4 snippets
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_snippet(snippet_id_1, content_1);
+    contract.add_snippet(snippet_id_2, content_2);
+    contract.add_snippet(snippet_id_3, content_3);
+    contract.add_snippet(snippet_id_4, content_4);
+    stop_cheat_caller_address(contract.contract_address);
+
+    // snippet id 3 gets 5 reactions
+    // snippet id 1 gets 4 reactions
+    // snippet id 2 gets 3 reactions
+    // snippet id 4 gets 2 reactions
+
+    // user 1
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<1>());
+    contract.react_snippet(snippet_id_1);
+    contract.react_snippet(snippet_id_2);
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_4);
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 2
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<2>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 3
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<3>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 4
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<4>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 5
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<5>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    let trending_snippets = contract.get_trending_snippets(4);
+
+    assert(trending_snippets.len() == 4, 'Should be 4 trending snippets');
+
+    let (trending_snippets_at_0, _) = trending_snippets.at(0);
+    let (trending_snippets_at_1, _) = trending_snippets.at(1);
+    let (trending_snippets_at_2, _) = trending_snippets.at(2);
+    let (trending_snippets_at_3, _) = trending_snippets.at(3);
+
+    assert(*trending_snippets_at_1 == snippet_id_1, 'Trending snippet ID mismatch');
+    assert(*trending_snippets_at_2 == snippet_id_2, 'Trending snippet ID mismatch');
+    assert(*trending_snippets_at_0 == snippet_id_3, 'Trending snippet ID mismatch');
+    assert(*trending_snippets_at_3 == snippet_id_4, 'Trending snippet ID mismatch');
+}
+
+
+#[test]
+#[should_panic(expected: 'Limit exceeded')]
+fn test_get_trending_snippets_should_panic_if_invalid_limit() {
+    let contract = init_contract();
+    let snippet_id_1 = 42;
+    let snippet_id_2 = 43;
+    let snippet_id_3 = 44;
+    let snippet_id_4 = 45;
+
+    let content_1 = 123;
+    let content_2 = 456;
+    let content_3 = 789;
+    let content_4 = 101112;
+
+    // add 4 snippets
+    start_cheat_caller_address(contract.contract_address, user_a());
+    contract.add_snippet(snippet_id_1, content_1);
+    contract.add_snippet(snippet_id_2, content_2);
+    contract.add_snippet(snippet_id_3, content_3);
+    contract.add_snippet(snippet_id_4, content_4);
+    stop_cheat_caller_address(contract.contract_address);
+
+    // snippet id 3 gets 5 reactions
+    // snippet id 1 gets 4 reactions
+    // snippet id 2 gets 3 reactions
+    // snippet id 4 gets 2 reactions
+
+    // user 1
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<1>());
+    contract.react_snippet(snippet_id_1);
+    contract.react_snippet(snippet_id_2);
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_4);
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 2
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<2>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 3
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<3>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 4
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<4>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    // user 5
+    start_cheat_caller_address(contract.contract_address, contract_address_const::<5>());
+    contract.react_snippet(snippet_id_3);
+    contract.react_snippet(snippet_id_1);
+
+    stop_cheat_caller_address(contract.contract_address);
+
+    contract.get_trending_snippets(5);
 }
