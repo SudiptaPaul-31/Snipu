@@ -7,7 +7,7 @@ import Link from "next/link";
 const Header = () => {
   return (
     <motion.header
-      className="relative flex justify-between items-center px-4 py-8 h-20 text-white sticky top-0 z-50 bg-[#00]/90 backdrop-blur-sm"
+      className="flex justify-between items-center px-4 py-8 h-20 text-white sticky top-0 z-50 bg-[#00]/90 backdrop-blur-sm"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -26,10 +26,23 @@ const Header = () => {
         />
       </Link>
       <nav className="flex gap-6 items-center">
-        <Link href="/about" className="text-lg font-semibold hover:text-teal-400 transition-colors">About</Link>
+        {/* Navigation Links - Desktop */}
+        <div className="hidden lg:flex gap-6 items-center">
+          <Link href="#snippet" className="text-lg font-semibold hover:text-teal-400 transition-colors">
+            Snippet
+          </Link>
+          <Link href="/about" className="text-lg font-semibold hover:text-teal-400 transition-colors">
+            About
+          </Link>
+          <Link href="#faq" className="text-lg font-semibold hover:text-teal-400 transition-colors">
+            FAQ
+          </Link>
+        </div>
+
+        {/* Mobile Menu Button */}
         <button
           aria-label="Open menu"
-          className="p-2 focus:outline-none focus:ring-2 focus:ring-teal-400 rounded-md"
+          className="lg:hidden p-2 focus:outline-none focus:ring-2 focus:ring-teal-400 rounded-md"
         >
           <Menu />
         </button>
