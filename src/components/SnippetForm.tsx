@@ -2,8 +2,10 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { TagInput } from "@/components/ui/tag-input";
 import { createSnippet } from "@/actions";
 import { useFormState } from "react-dom";
+import { getUniqueTags } from "@/lib/mockData";
 
 // Initial state for form
 const initialState = {
@@ -14,12 +16,20 @@ export default function SnippetForm({ userId }: { userId: string }) {
   const [state, formAction] = useFormState(createSnippet, initialState);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [description, setDescription] = useState("");
+  
+  const availableTags = getUniqueTags();
 
   const handleSubmit = async (formData: FormData) => {
     setIsUploading(true);
     setUploadError(null);
 
     try {
+      // Add tags and description to form data
+      formData.set("tags", tags.join(","));
+      formData.set("description", description);
+      
       await formAction(formData);
     } catch (error) {
       setUploadError(
@@ -110,17 +120,39 @@ export default function SnippetForm({ userId }: { userId: string }) {
 
       <div>
         <label
-          htmlFor="tags"
-          className="block text-sm font-medium text-gray-200"
+          htmlFor="description"
+          className="block text-sm font-medium text-gray-200 mb-2"
         >
-          Tags (comma separated)
+          Description
         </label>
-        <input
-          type="text"
-          id="tags"
-          name="tags"
+        <textarea
+          id="description"
+          name="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          rows={3}
           className="mt-1 block w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+          placeholder="Describe what this code snippet does..."
         />
+      </div>
+
+      <div>
+        <label
+          htmlFor="tags"
+          className="block text-sm font-medium text-gray-200 mb-2"
+        >
+          Tags
+        </label>
+        <TagInput
+          tags={tags}
+          onTagsChange={setTags}
+          placeholder="Add related topics..."
+          maxTags={8}
+          suggestions={availableTags}
+        />
+        <p className="mt-1 text-xs text-gray-400">
+          Add tags to help others discover your snippet
+        </p>
       </div>
 
       {/* Hidden field for author ID */}
