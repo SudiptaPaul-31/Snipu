@@ -233,18 +233,21 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                {snippet.tags.slice(0, 3).map((tag, index) => (
-                  <span
+                {snippet.tags.slice(0, 4).map((tag, index) => (
+                  <motion.span
                     key={index}
-                    className="px-2 py-1 bg-slate-700/50 text-gray-300 text-xs rounded-md border border-slate-600/30 group-hover:bg-slate-600/50 group-hover:text-white transition-colors"
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-teal-500/20 to-blue-500/20 text-teal-300 text-xs rounded-lg border border-teal-500/30 group-hover:from-teal-500/30 group-hover:to-blue-500/30 group-hover:text-teal-200 group-hover:border-teal-400/50 transition-all duration-300 cursor-pointer"
                   >
-                    #{tag}
-                  </span>
+                    <span className="text-[10px]">#</span>
+                    <span>{tag}</span>
+                  </motion.span>
                 ))}
-                {snippet.tags.length > 3 && (
-                  <span className="px-2 py-1 bg-slate-700/50 text-gray-400 text-xs rounded-md border border-slate-600/30">
-                    +{snippet.tags.length - 3}
-                  </span>
+                {snippet.tags.length > 4 && (
+                  <motion.span 
+                    className="px-2 py-1 bg-slate-700/50 text-gray-400 text-xs rounded-lg border border-slate-600/30 group-hover:bg-slate-600/50 group-hover:text-gray-300 transition-colors"
+                  >
+                    +{snippet.tags.length - 4}
+                  </motion.span>
                 )}
               </motion.div>
             )}

@@ -34,10 +34,13 @@ import Footer from "@/components/Footer";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import type { JSX } from "react/jsx-runtime";
+import { TagInput } from "@/components/ui/tag-input";
+import { getUniqueTags } from "@/lib/mockData";
 
 const CreateSnippetPage = () => {
   const [language, setLanguage] = useState("JavaScript");
   const [visibility, setVisibility] = useState("Public");
+  const [framework, setFramework] = useState("React");
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
   const [code, setCode] = useState(`// Welcome to Snipu! 
@@ -52,21 +55,35 @@ console.log(greetUser("Developer"));`);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isSaveEnabled, setIsSaveEnabled] = useState(true);
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [tags, setTags] = useState<string[]>(["JavaScript"]);
+  const [tags, setTags] = useState<string[]>([]);
   const [isCopied, setIsCopied] = useState(false);
+  const availableTags = getUniqueTags();
 
-  const getTagColor = (tagName: string): string => {
-    const colors: Record<string, string> = {
-      React: "from-blue-400 to-blue-600",
-      Vue: "from-green-400 to-green-600",
-      Angular: "from-red-400 to-red-600",
-      JavaScript: "from-yellow-400 to-orange-500",
-      TypeScript: "from-blue-500 to-blue-700",
-      Python: "from-blue-600 to-indigo-600",
-      CSS: "from-pink-400 to-purple-500",
-      HTML: "from-orange-400 to-red-500",
+
+  const getFrameworkIcon = (framework: string) => {
+    const icons: Record<string, JSX.Element> = {
+      React: (
+        <div className="w-4 h-4 rounded-full bg-blue-500 flex items-center justify-center text-xs text-white">
+          R
+        </div>
+      ),
+      Vue: (
+        <div className="w-4 h-4 rounded-full bg-green-500 flex items-center justify-center text-xs text-white">
+          V
+        </div>
+      ),
+      Angular: (
+        <div className="w-4 h-4 rounded-full bg-red-500 flex items-center justify-center text-xs text-white">
+          A
+        </div>
+      ),
+      "No Framework": (
+        <div className="w-4 h-4 rounded-full bg-gray-500 flex items-center justify-center text-xs text-white">
+          N
+        </div>
+      ),
     };
-    return colors[tagName] || "from-gray-400 to-gray-600";
+    return icons[framework] || icons["No Framework"];
   };
 
   const getLanguageIcon = (lang: string) => {
@@ -187,11 +204,6 @@ console.log(greetUser("Developer"));`);
     }, 2000);
   };
 
-  const handleAddTag = (newTag: string) => {
-    if (!tags.includes(newTag)) {
-      setTags([newTag]);
-    }
-  };
 
   const handleToggleBookmark = () => {
     setIsBookmarked(!isBookmarked);
@@ -350,7 +362,7 @@ console.log(greetUser("Developer"));`);
                     </DropdownMenu>
                   </div>
 
-                  {/* Framework/Tag Selector */}
+                  {/* Framework Selector */}
                   <div>
                     <Label className="text-sm font-medium text-gray-300 mb-2 block">
                       Framework
@@ -362,36 +374,21 @@ console.log(greetUser("Developer"));`);
                           className="w-full bg-slate-800/50 border-slate-600/50 text-white hover:bg-slate-700/50 hover:text-white justify-between"
                         >
                           <div className="flex items-center gap-2">
-                            <div
-                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(
-                                tags[0]
-                              )}`}
-                            />
-                            <span>{tags[0]}</span>
+                            {getFrameworkIcon(framework)}
+                            <span>{framework}</span>
                           </div>
                           <ChevronDown className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="bg-slate-800 border-slate-700">
-                        {[
-                          "React",
-                          "Vue",
-                          "Angular",
-                          "JavaScript",
-                          "TypeScript",
-                          "Python",
-                        ].map((tag) => (
+                        {["React", "Vue", "Angular", "No Framework"].map((fw) => (
                           <DropdownMenuItem
-                            key={tag}
-                            onClick={() => handleAddTag(tag)}
+                            key={fw}
+                            onClick={() => setFramework(fw)}
                             className="flex items-center gap-2 text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white"
                           >
-                            <div
-                              className={`w-4 h-4 rounded-full bg-gradient-to-r ${getTagColor(
-                                tag
-                              )}`}
-                            />
-                            {tag}
+                            {getFrameworkIcon(fw)}
+                            {fw}
                           </DropdownMenuItem>
                         ))}
                       </DropdownMenuContent>
@@ -438,6 +435,24 @@ console.log(greetUser("Developer"));`);
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
+
+                  {/* Topics Input */}
+                  <div className="col-span-3">
+                    <Label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Topics
+                    </Label>
+                    <TagInput
+                      tags={tags}
+                      onTagsChange={setTags}
+                      placeholder="Add related topics (hooks, patterns, etc.)..."
+                      maxTags={6}
+                      suggestions={availableTags}
+                    />
+                    <p className="mt-1 text-xs text-gray-400">
+                      Add topics to help others discover your snippet
+                    </p>
+                  </div>
+
                 </div>
               </div>
 
@@ -449,12 +464,10 @@ console.log(greetUser("Developer"));`);
                     Live Preview
                   </h3>
                   <div className="flex items-center gap-2">
-                    <div
-                      className={`w-3 h-3 rounded-full bg-gradient-to-r ${getTagColor(
-                        language
-                      )}`}
-                    />
+                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-teal-400 to-blue-500" />
                     <span className="text-sm text-gray-400">{language}</span>
+                    <span className="text-sm text-gray-500">•</span>
+                    <span className="text-sm text-gray-400">{framework}</span>
                   </div>
                 </div>
 

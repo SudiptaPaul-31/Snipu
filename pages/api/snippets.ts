@@ -41,6 +41,10 @@ export default async function handler(
         where,
         skip,
         take: limit,
+        include: {
+          tags: true,
+          author: true,
+        },
         orderBy: [
           {
             isBookmarked: "desc",
@@ -98,6 +102,12 @@ export default async function handler(
       return res
         .status(400)
         .json({ message: "Code is required and must be longer" });
+    }
+
+    if (!Array.isArray(tags)) {
+      return res
+        .status(400)
+        .json({ message: "Tags must be an array" });
     }
 
     try {

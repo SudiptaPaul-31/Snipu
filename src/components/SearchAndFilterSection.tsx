@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Search,
   Filter,
@@ -16,27 +17,46 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { getUniqueLanguages, getUniqueTags } from "@/lib/mockData";
+import { getUniqueLanguages, getUniqueTags, fetchTagsFromAPI } from "@/lib/mockData";
 
 interface SearchAndFilterSectionProps {
   searchQuery: string;
   languageFilter: string;
+  tagFilter: string;
   viewMode: "grid" | "list";
   onSearchChange: (value: string) => void;
   onLanguageChange: (value: string) => void;
+  onTagChange: (value: string) => void;
   onViewModeToggle: () => void;
 }
 
 export function SearchAndFilterSection({
   searchQuery,
   languageFilter,
+  tagFilter,
   viewMode,
   onSearchChange,
   onLanguageChange,
+  onTagChange,
   onViewModeToggle,
 }: SearchAndFilterSectionProps) {
   const languages = getUniqueLanguages();
-  const tags = getUniqueTags();
+  const [tags, setTags] = useState<string[]>([]);
+
+  // Fetch real tags from API
+  useEffect(() => {
+    const loadTags = async () => {
+      try {
+        const apiTags = await fetchTagsFromAPI();
+        setTags(apiTags);
+      } catch (error) {
+        console.error("Error loading tags:", error);
+        // Fallback to mock data
+        setTags(getUniqueTags());
+      }
+    };
+    loadTags();
+  }, []);
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 w-full">
@@ -66,7 +86,6 @@ export function SearchAndFilterSection({
       </motion.div>
 
       <div className="flex gap-4">
-        {" "}
         {/* Language Filter Dropdown */}
         <motion.div
           className="relative flex-1"
@@ -102,6 +121,48 @@ export function SearchAndFilterSection({
                   className="text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white rounded-xl mx-1 my-1"
                 >
                   {language}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </motion.div>
+
+        {/* Tag Filter Dropdown */}
+        <motion.div
+          className="relative flex-1"
+          whileFocus={{ scale: 1.02 }}
+          transition={{ duration: 0.2 }}
+        >
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="w-full sm:w-48 h-12 bg-slate-800/50 backdrop-blur-sm border border-slate-600/50 text-white hover:bg-slate-700/50 hover:border-slate-500/50 transition-all duration-300 justify-between rounded-2xl"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-teal-400">#</span>
+                  <span className="text-gray-300">
+                    {tagFilter || "All Tags"}
+                  </span>
+                </div>
+                <ChevronDown className="w-4 h-4 text-gray-400" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-48 bg-slate-800 border-slate-700 rounded-2xl max-h-64 overflow-y-auto">
+              <DropdownMenuItem
+                onClick={() => onTagChange("")}
+                className="text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white rounded-xl mx-1 my-1"
+              >
+                All Tags
+              </DropdownMenuItem>
+              {tags.map((tag) => (
+                <DropdownMenuItem
+                  key={tag}
+                  onClick={() => onTagChange(tag)}
+                  className="text-gray-300 hover:text-white hover:bg-slate-700 focus:bg-slate-700 focus:text-white rounded-xl mx-1 my-1 flex items-center gap-2"
+                >
+                  <span className="text-[10px] text-teal-400">#</span>
+                  <span>{tag}</span>
                 </DropdownMenuItem>
               ))}
             </DropdownMenuContent>

@@ -17,6 +17,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [languageFilter, setLanguageFilter] = useState("");
+  const [tagFilter, setTagFilter] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
@@ -58,13 +59,21 @@ export default function Home() {
           ? true
           : snippet.language.toLowerCase() === languageFilter.toLowerCase();
 
-      return matchesSearch && matchesLanguage;
+      const matchesTag =
+        tagFilter === ""
+          ? true
+          : snippet.tags.some((tag) =>
+              tag.toLowerCase() === tagFilter.toLowerCase()
+            );
+
+      return matchesSearch && matchesLanguage && matchesTag;
     });
-  }, [snippets, searchQuery, languageFilter]);
+  }, [snippets, searchQuery, languageFilter, tagFilter]);
 
   const toggleViewMode = () => {
     setViewMode((prev) => (prev === "grid" ? "list" : "grid"));
   };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0a1929] to-black text-white overflow-hidden relative">
@@ -170,9 +179,11 @@ export default function Home() {
               <SearchAndFilterSection
                 searchQuery={searchQuery}
                 languageFilter={languageFilter}
+                tagFilter={tagFilter}
                 viewMode={viewMode}
                 onSearchChange={setSearchQuery}
                 onLanguageChange={setLanguageFilter}
+                onTagChange={setTagFilter}
                 onViewModeToggle={toggleViewMode}
               />
             </div>
@@ -226,7 +237,10 @@ export default function Home() {
                   transition={{ delay: 1.4 + index * 0.1, duration: 0.5 }}
                   whileHover={{ y: -5 }}
                 >
-                  <SnippetCard snippet={snippet} viewMode={viewMode} />
+                  <SnippetCard 
+                    snippet={snippet} 
+                    viewMode={viewMode} 
+                  />
                 </motion.div>
               ))}
             </div>
@@ -245,7 +259,7 @@ export default function Home() {
                   No snippets found
                 </h3>
                 <p className="text-gray-400 mb-6">
-                  {searchQuery || languageFilter
+                  {searchQuery || languageFilter || tagFilter
                     ? "Try adjusting your search or filter criteria"
                     : "Create your first code snippet to get started"}
                 </p>
